@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+
+import argparse
+import json
+from collections import defaultdict
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--json", required=True)
+args = parser.parse_args()
+
+
+class RDict(dict):
+  def __missing__(self, key):
+    return RDict()
+  def __str__(self):
+    return ""
+  def __repr__(self):
+    return ""
+
+def to_rdict(d):
+  if isinstance(d, dict):
+    return RDict({k: to_rdict(v) for k, v in d.items()})
+  if isinstance(d, list):
+    return [to_rdict(i) for i in d]
+  else:
+    return d
+
+def space(arr):
+  return ' '.join([str(a) for a in arr if a])
+
+
+with open(args.json, 'r') as f:
+  data = json.load(f)
+data = to_rdict(data)
+sys = data['system']
+
+print(data['name']);
+
+abl = sys['abilities']
+stats = [f"{a.upper()} {abl[a]['mod']}" for a in ['str', 'dex', 'con', 'int', 'wis', 'cha']]
+print(', '.join(stats))
+
+atr = sys['attributes']
+os = ''
+if 'otherSpeeds' in atr['speed']:
+  os = [f"{os['type']} {os['value']}" for os in atr['speed']['otherSpeeds']]
+  os = f" ({', '.join(os)})"
+print(f"AC {atr['ac']['value']}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
+
+perc = sys['perception']
+sens = [space([a['type'], a['range'], a['acuity']]) for a in perc['senses']]
+print(f"perc {perc['mod']} ({', '.join(sens)})")
+
+svs = sys['saves']
+stats = [f"{a[:4]} {svs[a]['value']}" for a in ['fortitude', 'reflex', 'will']]
+print(', '.join(stats))
+
+for i in data['items']:
+  s = i['system']
+  title = i['name']
+
+  actions = '   '
+  if s['actionType']['value'] == 'reaction':
+    actions += '<-'
+  elif s['actionType']['value'] == 'passive':
+    actions += '-'
+  elif 'value' in s['actions'] and s['actions']['value'] is not None:
+    actions += '*' * s['actions']['value']
+  else:
+    actions += '*'
+  title = f"{actions[-3:]} {title}"
+
+  if 'bonus' in s:
+    title += f" +{s['bonus']['value']}"
+
+  if 'damageRolls' in s:
+    dmg = [f"{d['damage']}{d['damageType'][0]}" for d in s['damageRolls'].values()]
+    title += f" {', '.join(dmg)}"
+
+  print(title)
