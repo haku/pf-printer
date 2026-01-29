@@ -95,6 +95,9 @@ svs = sys['saves']
 stats = [f"{a[:4]} {svs[a]['value']}{svs[a]['saveDetail']}" for a in ['fortitude', 'reflex', 'will']]
 print(', '.join(stats))
 
+# TODO languages
+# TODO skills
+
 items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
 for i in items:
   s = i['system']
@@ -137,7 +140,7 @@ ListItem.new_line = False
 for i in items:
   html = i['system']['description']['value']
   html = remove_macros(html)
-  if not html:
+  if not html or html == '<p></p>':
     continue
 
   console.print(Markdown('---'))
