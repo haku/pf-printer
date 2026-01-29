@@ -2,7 +2,16 @@
 
 import argparse
 import json
+import re
 from collections import defaultdict
+from operator import itemgetter
+
+from markdownify import markdownify
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.markdown import Paragraph
+from rich.markdown import ListElement
+from rich.markdown import ListItem
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--json", required=True)
@@ -25,8 +34,39 @@ def to_rdict(d):
   else:
     return d
 
-def space(arr):
+def space(*arr):
   return ' '.join([str(a) for a in arr if a])
+
+def remove_macros(text):
+  matches = re.finditer(r"@([^[]+)\[([^\]]+)\](\{[^}]+\})?", text)
+  for m in reversed(list(matches)):
+    a = m.group(1)
+    b = m.group(2)
+    c = m.group(3)
+    if a == "Check":
+      p = b.split('|')
+      rep = p[0]
+      if len(p) >= 2:
+        rep += f"/{p[1]}"
+    elif a == "UUID":
+      if c:
+        rep = c
+      else:
+        rep = b.rsplit('.', maxsplit=1)[1]
+    elif a == "Localize":
+      rep = ""
+    elif a == "Damage":
+      rep = b
+    elif a == "Template":
+      if c:
+        rep = c
+      else:
+        p = b.split('|')
+        rep = f"{p[0].replace('type:', '')}/{p[1]}"
+    else:
+      continue
+    text = text[:m.start()] + rep + text[m.end():]
+  return text
 
 
 with open(args.json, 'r') as f:
@@ -42,20 +82,21 @@ print(', '.join(stats))
 
 atr = sys['attributes']
 os = ''
-if 'otherSpeeds' in atr['speed']:
+if atr['speed']['otherSpeeds']:
   os = [f"{os['type']} {os['value']}" for os in atr['speed']['otherSpeeds']]
   os = f" ({', '.join(os)})"
 print(f"AC {atr['ac']['value']}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
 
 perc = sys['perception']
-sens = [space([a['type'], a['range'], a['acuity']]) for a in perc['senses']]
+sens = [space(a['type'], a['range'], a['acuity']) for a in perc['senses']]
 print(f"perc {perc['mod']} ({', '.join(sens)})")
 
 svs = sys['saves']
-stats = [f"{a[:4]} {svs[a]['value']}" for a in ['fortitude', 'reflex', 'will']]
+stats = [f"{a[:4]} {svs[a]['value']}{svs[a]['saveDetail']}" for a in ['fortitude', 'reflex', 'will']]
 print(', '.join(stats))
 
-for i in data['items']:
+items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
+for i in items:
   s = i['system']
   title = i['name']
 
@@ -77,4 +118,31 @@ for i in data['items']:
     dmg = [f"{d['damage']}{d['damageType'][0]}" for d in s['damageRolls'].values()]
     title += f" {', '.join(dmg)}"
 
-  print(title)
+  if 'level' in s:
+    title += f" lv{s['level']['value']}"
+
+  if 'duration' in s:
+    title += f" ({s['duration']['value']})"
+
+  i['heading'] = title
+
+print('\n'.join([a['heading'] for a in items]))
+
+
+console = Console()
+Paragraph.new_line = False
+ListElement.new_line = False
+ListItem.new_line = False
+
+for i in items:
+  html = i['system']['description']['value']
+  html = remove_macros(html)
+  if not html:
+    continue
+
+  console.print(Markdown('---'))
+  print(i['heading'])
+  html = html.replace('\n', '')
+  md = markdownify(html, strip=['hr'])
+  md = Markdown(md)
+  console.print(md)
