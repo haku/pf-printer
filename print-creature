@@ -108,8 +108,10 @@ for i in items:
     actions += '<-'
   elif s['actionType']['value'] == 'passive':
     actions += '-'
-  elif 'value' in s['actions'] and s['actions']['value'] is not None:
+  elif s['actions']['value']:
     actions += '*' * s['actions']['value']
+  elif s['time']['value']:
+    actions += '*' * int(s['time']['value'])
   else:
     actions += '*'
   title = f"{actions[-3:]} {title}"
