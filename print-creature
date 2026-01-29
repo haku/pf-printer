@@ -3,6 +3,7 @@
 import argparse
 import json
 import re
+import sys
 from collections import defaultdict
 from operator import itemgetter
 
@@ -15,6 +16,7 @@ from rich.markdown import ListItem
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--json", required=True)
+parser.add_argument("--details", action="store_true")
 args = parser.parse_args()
 
 
@@ -72,49 +74,65 @@ def remove_macros(text):
 with open(args.json, 'r') as f:
   data = json.load(f)
 data = to_rdict(data)
-sys = data['system']
+stm = data['system']
 
 print(data['name']);
 
-abl = sys['abilities']
+abl = stm['abilities']
 stats = [f"{a.upper()} {abl[a]['mod']}" for a in ['str', 'dex', 'con', 'int', 'wis', 'cha']]
 print(', '.join(stats))
 
-atr = sys['attributes']
+atr = stm['attributes']
 os = ''
 if atr['speed']['otherSpeeds']:
   os = [f"{os['type']} {os['value']}" for os in atr['speed']['otherSpeeds']]
   os = f" ({', '.join(os)})"
 print(f"AC {atr['ac']['value']}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
 
-perc = sys['perception']
+perc = stm['perception']
 sens = [space(a['type'], a['range'], a['acuity']) for a in perc['senses']]
 print(f"perc {perc['mod']} ({', '.join(sens)})")
 
-svs = sys['saves']
+svs = stm['saves']
 stats = [f"{a[:4]} {svs[a]['value']}{svs[a]['saveDetail']}" for a in ['fortitude', 'reflex', 'will']]
 print(', '.join(stats))
 
 # TODO languages
 # TODO skills
 
+def parse_actions(t):
+  if t == 'reaction':
+    return '<-'
+  elif t == 'passive':
+    return '-'
+  elif t == "1 to 3":
+    return '*/**/***'
+  else:
+    m = re.match(r"(\d+) *(minutes?|hours?|days?)", str(t))
+    if m:
+      return f"{m.group(1)}{m.group(2)[:1]}"
+
+    try:
+      return '*' * int(t)
+    except ValueError:
+      return t
+
+
 items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
 for i in items:
   s = i['system']
   title = i['name']
 
-  actions = '   '
-  if s['actionType']['value'] == 'reaction':
-    actions += '<-'
-  elif s['actionType']['value'] == 'passive':
-    actions += '-'
-  elif s['actions']['value']:
-    actions += '*' * s['actions']['value']
+  actions = ' ' * 10
+  if s['actions']['value']:
+    actions += parse_actions(s['actions']['value'])
+  elif s['actionType']['value']:
+    actions += parse_actions(s['actionType']['value'])
   elif s['time']['value']:
-    actions += '*' * int(s['time']['value'])
+    actions += parse_actions(s['time']['value'])
   else:
     actions += '*'
-  title = f"{actions[-3:]} {title}"
+  title = f"{actions[-10:]} {title}"
 
   if 'bonus' in s:
     title += f" +{s['bonus']['value']}"
@@ -126,13 +144,20 @@ for i in items:
   if 'level' in s:
     title += f" lv{s['level']['value']}"
 
-  if 'duration' in s:
+  if s['duration']['sustained']:
+    title += f" (sustained)"
+  if s['duration']['value']:
     title += f" ({s['duration']['value']})"
+
+  if s['attackEffects']['value']:
+    title += f" --> {', '.join(s['attackEffects']['value'])}"
 
   i['heading'] = title
 
 print('\n'.join([a['heading'] for a in items]))
 
+if not args.details:
+  sys.exit(0)
 
 console = Console()
 Paragraph.new_line = False
