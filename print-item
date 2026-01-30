@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import argparse
+import re
+import sys
+from operator import itemgetter
+
+import common
+from common import space
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--json", required=True)
+parser.add_argument("--details", action="store_true")
+args = parser.parse_args()
+
+data = common.read_json_file(args.json)
+stm = data['system']
+
+def price(p):
+  v = p['value']
+  if not v:
+    return None
+  return space(*[f"{v[c]}{c}" for c in ['pp', 'gp', 'sp', 'cp'] if v[c]])
+
+def suffix(val, suf):
+  if not val:
+    return ''
+  return f"{val} {suf}"
+
+def hp(h):
+  v = h['value']
+  m = h['max']
+  if v:
+    if v == m or not m:
+      return f"{v} hp"
+    return f"{v}/{m} hp"
+  if m:
+    return f"{m} hp"
+  return None
+
+print(data['name']);
+print(space(
+  suffix(stm['acBonus'], 'AC'),
+  suffix(stm['checkPenalty'], 'CP'),
+  stm['category'],
+  common.level(stm['level']),
+  price(stm['price']),
+  suffix(stm['bulk']['value'], 'bulk'),
+  suffix(stm['hardness'], 'hrd'),
+  hp(stm['hp']),
+  sep=', '));
+
+#TODO material quantity uses
+
+dmg = stm['damage']
+if dmg:
+  print(f"{dmg['formula']} ({space(dmg['kind'], dmg['type'], sep=', ')})");
+
+common.print_hr()
+common.print_html(stm['description']['value'])

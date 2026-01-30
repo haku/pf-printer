@@ -81,8 +81,8 @@ for i in items:
     dmg = [f"{d['damage']}{d['damageType'][0]}" for d in s['damageRolls'].values()]
     title += f" {', '.join(dmg)}"
 
-  if 'level' in s:
-    title += f" lv{s['level']['value']}"
+  if s['level']:
+    title += f" {common.level(s['level'])}"
 
   if s['duration']['sustained']:
     title += f" (sustained)"

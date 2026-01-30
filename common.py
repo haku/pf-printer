@@ -31,8 +31,13 @@ def read_json_file(path):
     data = json.load(f)
   return to_rdict(data)
 
-def space(*arr):
-  return ' '.join([str(a) for a in arr if a])
+def space(*arr, sep=" "):
+  return sep.join([str(a) for a in arr if a])
+
+def level(l):
+  if not l['value']:
+    return None
+  return f"L{l['value']}"
 
 def remove_macros(text):
   matches = re.finditer(r"@([^[]+)\[([^\]]+)\](\{[^}]+\})?", text)
@@ -65,21 +70,38 @@ def remove_macros(text):
     text = text[:m.start()] + rep + text[m.end():]
   return text
 
-def print_heading_and_html(things):
+
+def html_to_md(html):
+  html = remove_macros(html)
+  if not html or html == '<p></p>':
+    return None
+  html = html.replace('\n', '')
+  return markdownify(html, strip=['hr'])
+
+def mk_console():
   console = Console()
   Paragraph.new_line = False
   ListElement.new_line = False
   ListItem.new_line = False
+  return console
+
+def print_html(html):
+  md = html_to_md(html)
+  if not md:
+    return
+  mk_console().print(Markdown(md))
+
+def print_hr():
+  mk_console().print(Markdown('---'))
+
+def print_heading_and_html(things):
+  console = mk_console()
 
   for heading, html in things:
-    html = remove_macros(html)
-    if not html or html == '<p></p>':
+    md = html_to_md(html)
+    if not md:
       continue
 
     console.print(Markdown('---'))
     print(heading)
-    html = html.replace('\n', '')
-    md = markdownify(html, strip=['hr'])
-    md = Markdown(md)
-    console.print(md)
-  
+    console.print(Markdown(md))
