@@ -13,8 +13,6 @@ parser.add_argument("--json", required=True)
 parser.add_argument("--details", action="store_true")
 args = parser.parse_args()
 
-data = common.read_json_file(args.json)
-stm = data['system']
 
 def price(p):
   v = p['value']
@@ -38,23 +36,31 @@ def hp(h):
     return f"{m} hp"
   return None
 
-print(data['name']);
-print(space(
-  suffix(stm['acBonus'], 'AC'),
-  suffix(stm['checkPenalty'], 'CP'),
-  stm['category'],
-  common.level(stm['level']),
-  price(stm['price']),
-  suffix(stm['bulk']['value'], 'bulk'),
-  suffix(stm['hardness'], 'hrd'),
-  hp(stm['hp']),
-  sep=', '));
+def print_item(data, printer):
+  stm = data['system']
 
-#TODO material quantity uses
+  printer.print(data['name']);
+  printer.print(space(
+    suffix(stm['acBonus'], 'AC'),
+    suffix(stm['checkPenalty'], 'CP'),
+    stm['category'],
+    common.level(stm['level']),
+    price(stm['price']),
+    suffix(stm['bulk']['value'], 'bulk'),
+    suffix(stm['hardness'], 'hrd'),
+    hp(stm['hp']),
+    sep=', '));
 
-dmg = stm['damage']
-if dmg:
-  print(f"{dmg['formula']} ({space(dmg['kind'], dmg['type'], sep=', ')})");
+  #TODO material quantity uses
 
-common.print_hr()
-common.print_html(stm['description']['value'])
+  dmg = stm['damage']
+  if dmg:
+    printer.print(f"{dmg['formula']} ({space(dmg['kind'], dmg['type'], sep=', ')})");
+
+  printer.print_hr()
+  printer.print_html(stm['description']['value'])
+
+
+printer = common.Printer()
+data = common.read_json_file(args.json)
+print_item(data, printer)

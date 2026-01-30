@@ -71,37 +71,39 @@ def remove_macros(text):
   return text
 
 
-def html_to_md(html):
-  html = remove_macros(html)
-  if not html or html == '<p></p>':
-    return None
-  html = html.replace('\n', '')
-  return markdownify(html, strip=['hr'])
+class Printer:
 
-def mk_console():
-  console = Console()
-  Paragraph.new_line = False
-  ListElement.new_line = False
-  ListItem.new_line = False
-  return console
+  def __init__(self):
+    Paragraph.new_line = False
+    ListElement.new_line = False
+    ListItem.new_line = False
+    self.console = Console(highlight=False, no_color=True)
 
-def print_html(html):
-  md = html_to_md(html)
-  if not md:
-    return
-  mk_console().print(Markdown(md))
+  @staticmethod
+  def html_to_md(html):
+    html = remove_macros(html)
+    if not html or html == '<p></p>':
+      return None
+    html = html.replace('\n', '')
+    return markdownify(html, strip=['hr'])
 
-def print_hr():
-  mk_console().print(Markdown('---'))
+  def print(self, text):
+    self.console.out(text)
 
-def print_heading_and_html(things):
-  console = mk_console()
-
-  for heading, html in things:
-    md = html_to_md(html)
+  def print_html(self, html):
+    md = self.html_to_md(html)
     if not md:
-      continue
+      return
+    self.console.print(Markdown(md))
 
-    console.print(Markdown('---'))
-    print(heading)
-    console.print(Markdown(md))
+  def print_hr(self):
+    self.console.print(Markdown('---'))
+
+  def print_heading_and_html(self, things):
+    for heading, html in things:
+      md = self.html_to_md(html)
+      if not md:
+        continue
+      self.console.print(Markdown('---'))
+      self.console.out(heading)
+      self.console.print(Markdown(md))

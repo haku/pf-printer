@@ -2,7 +2,6 @@
 
 import argparse
 import re
-import sys
 from operator import itemgetter
 
 import common
@@ -13,32 +12,6 @@ parser.add_argument("--json", required=True)
 parser.add_argument("--details", action="store_true")
 args = parser.parse_args()
 
-data = common.read_json_file(args.json)
-stm = data['system']
-
-print(data['name']);
-
-abl = stm['abilities']
-stats = [f"{a.upper()} {abl[a]['mod']}" for a in ['str', 'dex', 'con', 'int', 'wis', 'cha']]
-print(', '.join(stats))
-
-atr = stm['attributes']
-os = ''
-if atr['speed']['otherSpeeds']:
-  os = [f"{os['type']} {os['value']}" for os in atr['speed']['otherSpeeds']]
-  os = f" ({', '.join(os)})"
-print(f"AC {atr['ac']['value']}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
-
-perc = stm['perception']
-sens = [space(a['type'], a['range'], a['acuity']) for a in perc['senses']]
-print(f"perc {perc['mod']} ({', '.join(sens)})")
-
-svs = stm['saves']
-stats = [f"{a[:4]} {svs[a]['value']}{svs[a]['saveDetail']}" for a in ['fortitude', 'reflex', 'will']]
-print(', '.join(stats))
-
-# TODO languages
-# TODO skills
 
 def parse_actions(t):
   if t == 'reaction':
@@ -57,48 +30,78 @@ def parse_actions(t):
     except ValueError:
       return t
 
+def print_creature(data, printer):
+  printer.print(data['name']);
+  stm = data['system']
 
-items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
-for i in items:
-  s = i['system']
-  title = i['name']
+  abl = stm['abilities']
+  stats = [f"{a.upper()} {abl[a]['mod']}" for a in ['str', 'dex', 'con', 'int', 'wis', 'cha']]
+  printer.print(', '.join(stats))
 
-  actions = ' ' * 10
-  if s['actions']['value']:
-    actions += parse_actions(s['actions']['value'])
-  elif s['actionType']['value']:
-    actions += parse_actions(s['actionType']['value'])
-  elif s['time']['value']:
-    actions += parse_actions(s['time']['value'])
-  else:
-    actions += '*'
-  title = f"{actions[-10:]} {title}"
+  atr = stm['attributes']
+  os = ''
+  if atr['speed']['otherSpeeds']:
+    os = [f"{os['type']} {os['value']}" for os in atr['speed']['otherSpeeds']]
+    os = f" ({', '.join(os)})"
+  printer.print(f"AC {atr['ac']['value']}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
 
-  if 'bonus' in s:
-    title += f" +{s['bonus']['value']}"
+  perc = stm['perception']
+  sens = [space(a['type'], a['range'], a['acuity']) for a in perc['senses']]
+  printer.print(f"perc {perc['mod']} ({', '.join(sens)})")
 
-  if 'damageRolls' in s:
-    dmg = [f"{d['damage']}{d['damageType'][0]}" for d in s['damageRolls'].values()]
-    title += f" {', '.join(dmg)}"
+  svs = stm['saves']
+  stats = [f"{a[:4]} {svs[a]['value']}{svs[a]['saveDetail']}" for a in ['fortitude', 'reflex', 'will']]
+  printer.print(', '.join(stats))
 
-  if s['level']:
-    title += f" {common.level(s['level'])}"
+  # TODO languages
+  # TODO skills
 
-  if s['duration']['sustained']:
-    title += f" (sustained)"
-  if s['duration']['value']:
-    title += f" ({s['duration']['value']})"
+  items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
+  for i in items:
+    s = i['system']
+    title = i['name']
 
-  if s['attackEffects']['value']:
-    title += f" --> {', '.join(s['attackEffects']['value'])}"
+    actions = ' ' * 10
+    if s['actions']['value']:
+      actions += parse_actions(s['actions']['value'])
+    elif s['actionType']['value']:
+      actions += parse_actions(s['actionType']['value'])
+    elif s['time']['value']:
+      actions += parse_actions(s['time']['value'])
+    else:
+      actions += '*'
+    title = f"{actions[-10:]} {title}"
 
-  i['heading'] = title
+    if 'bonus' in s:
+      title += f" +{s['bonus']['value']}"
 
-print('\n'.join([a['heading'] for a in items]))
+    if 'damageRolls' in s:
+      dmg = [f"{d['damage']}{d['damageType'][0]}" for d in s['damageRolls'].values()]
+      title += f" {', '.join(dmg)}"
 
-if not args.details:
-  sys.exit(0)
+    if s['level']:
+      title += f" {common.level(s['level'])}"
 
-common.print_heading_and_html([
-  (i['heading'], i['system']['description']['value'])
-  for i in items])
+    if s['duration']['sustained']:
+      title += f" (sustained)"
+    if s['duration']['value']:
+      title += f" ({s['duration']['value']})"
+
+    if s['attackEffects']['value']:
+      title += f" --> {', '.join(s['attackEffects']['value'])}"
+
+    i['heading'] = title
+
+  printer.print('\n'.join([a['heading'] for a in items]))
+
+  if not args.details:
+    return
+
+  printer.print_heading_and_html([
+    (i['heading'], i['system']['description']['value'])
+    for i in items])
+
+
+printer = common.Printer()
+data = common.read_json_file(args.json)
+print_creature(data, printer)
