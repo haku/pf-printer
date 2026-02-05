@@ -1,4 +1,6 @@
+import argparse
 import json
+import pathlib
 import re
 from collections import defaultdict
 
@@ -8,6 +10,19 @@ from rich.markdown import Markdown
 from rich.markdown import Paragraph
 from rich.markdown import ListElement
 from rich.markdown import ListItem
+
+
+class Args:
+  def __init__(self):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--json",  type=pathlib.Path, required=True)
+    parser.add_argument("--details", action="store_true")
+    args = parser.parse_args()
+
+    self.json_path = args.json
+    self.show_details = args.details
+
+ARGS = Args()
 
 
 class RDict(dict):
@@ -30,6 +45,12 @@ def read_json_file(path):
   with open(path, 'r') as f:
     data = json.load(f)
   return to_rdict(data)
+
+def read_json():
+  with open(ARGS.json_path, 'r') as f:
+    data = json.load(f)
+  return to_rdict(data)
+
 
 def space(*arr, sep=" "):
   return sep.join([str(a) for a in arr if a])
