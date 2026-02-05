@@ -54,18 +54,19 @@ def print_creature(data, printer):
   items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
   for i in items:
     s = i['system']
-    title = i['name']
 
-    actions = ' ' * 10
+    marker = ' ' * 10
     if s['actions']['value']:
-      actions += parse_actions(s['actions']['value'])
+      marker += parse_actions(s['actions']['value'])
     elif s['actionType']['value']:
-      actions += parse_actions(s['actionType']['value'])
+      marker += parse_actions(s['actionType']['value'])
     elif s['time']['value']:
-      actions += parse_actions(s['time']['value'])
+      marker += parse_actions(s['time']['value'])
     else:
-      actions += '*'
-    title = f"{actions[-10:]} {title}"
+      marker += '*'
+    marker = f"{marker[-10:]} "
+
+    title = i['name']
 
     if 'bonus' in s:
       title += f" +{s['bonus']['value']}"
@@ -85,9 +86,8 @@ def print_creature(data, printer):
     if s['attackEffects']['value']:
       title += f" --> {', '.join(s['attackEffects']['value'])}"
 
-    i['heading'] = title
-
-  printer.print('\n'.join([a['heading'] for a in items]))
+    i['heading'] = printer.render_item(marker, title)
+    printer.print(i['heading'])
 
   if not ARGS.show_details:
     return
