@@ -97,6 +97,6 @@ def print_creature(data, printer):
     for i in items])
 
 
-printer = common.Printer()
 data = common.read_json()
-print_creature(data, printer)
+with common.Printer() as p:
+  print_creature(data, p)

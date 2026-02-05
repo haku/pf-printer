@@ -1,8 +1,11 @@
 import argparse
+import io
 import json
 import pathlib
 import re
 from collections import defaultdict
+from contextlib import AbstractContextManager
+from types import TracebackType
 
 from markdownify import markdownify
 from rich.console import Console
@@ -13,6 +16,11 @@ from rich.markdown import Markdown
 from rich.markdown import Paragraph
 from rich.segment import Segment
 from rich.segment import Segments
+from rich.rule import Rule
+
+from escpos import printer
+from stransi.attribute import Attribute
+import stransi
 
 
 class Args:
@@ -21,11 +29,15 @@ class Args:
     parser.add_argument("--json",  type=pathlib.Path, required=True)
     parser.add_argument("--width", type=int, default=56)
     parser.add_argument("--details", action="store_true")
+    parser.add_argument("--preview", action="store_true")
+    parser.add_argument("--printer", default="TM-T88II")
     args = parser.parse_args()
 
     self.json_path = args.json
     self.text_width = args.width
     self.show_details = args.details
+    self.print_preview = args.preview
+    self.print_profile = args.printer
 
 ARGS = Args()
 
@@ -97,17 +109,49 @@ def remove_macros(text):
   return text
 
 
-class Printer:
+class MyConsole(Console):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+  @property
+  def encoding(self) -> str:
+    return "latin_1"
+
+
+class Printer(AbstractContextManager):
 
   def __init__(self):
     Paragraph.new_line = False
     ListElement.new_line = False
     ListItem.new_line = False
-    self.console = Console(
+
+    #buffer = io.BytesIO()
+    #file = io.TextIOWrapper(buffer, encoding='latin_1', errors=None, write_through=True)
+    file = io.StringIO()
+
+    self.console = MyConsole(
+        file=file,
+        force_terminal=True,
         width=ARGS.text_width,
-        no_color=True,
         highlight=False,
+        markup=False,
+        no_color=True,
         )
+
+  def __enter__(self):
+    return self
+
+  def __exit__(self, exc_type: type[BaseException] | None, exc_value:
+               BaseException | None, traceback: TracebackType | None) -> None:
+    #captured = self.console.file.buffer.getvalue()
+    captured = self.console.file.getvalue()
+    if ARGS.print_preview:
+      p = printer.Dummy(profile=ARGS.print_profile)
+      self.ansi_to_escpos(captured, p)
+      #print(p.output.decode('latin_1'))
+      print(p.output)
+    else:
+      #print(captured.decode('latin_1'))
+      print(captured)
 
   @staticmethod
   def html_to_md(html):
@@ -127,7 +171,7 @@ class Printer:
     self.console.print(Markdown(md))
 
   def print_hr(self):
-    self.console.print(Markdown('---'))
+    self.console.print(Rule(characters='-'))
 
   def render_item(self, marker, text):
     opts = self.console.options.update_width(ARGS.text_width - len(marker))
@@ -150,6 +194,31 @@ class Printer:
       md = self.html_to_md(html)
       if not md:
         continue
-      self.console.print(Markdown('---'))
+      self.print_hr()
       self.print(heading)
       self.console.print(Markdown(md))
+
+# @staticmethod
+# def unicode_to_ascii(s):
+#   return s.replace('•', '*')
+
+  @staticmethod
+  def ansi_to_escpos(ansi, printer):
+    decoded = stransi.Ansi(ansi)
+    # https://python-escpos.readthedocs.io/en/latest/api/escpos.html#escpos.escpos.Escpos.set_with_default
+    printer.set_with_default(font="b")
+    for i in decoded.instructions():
+      if isinstance(i, str):
+        printer.text(i)
+      elif isinstance(i, stransi.SetAttribute):
+        # https://github.com/getcuia/stransi/blob/main/src/stransi/attribute.py
+        if i.attribute == Attribute.NORMAL:
+          printer.set(bold=False, underline=False)
+        elif i.attribute == Attribute.BOLD:
+          printer.set(bold=True)
+        elif i.attribute == Attribute.UNDERLINE:
+          printer.set(underline=True)
+        else:
+          raise Exception(f"unknown attribute {i.attribute}: {i}")
+      else:
+        raise Exception(f"unknown type {type(i)}: {i}")

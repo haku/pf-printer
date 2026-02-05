@@ -53,6 +53,6 @@ def print_item(data, printer):
   printer.print_html(stm['description']['value'])
 
 
-printer = common.Printer()
 data = common.read_json()
-print_item(data, printer)
+with common.Printer() as p:
+  print_item(data, p)
