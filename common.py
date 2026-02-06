@@ -9,14 +9,18 @@ from types import TracebackType
 
 from markdownify import markdownify
 from rich.console import Console
+from rich.console import ConsoleOptions
 from rich.console import NewLine
+from rich.console import RenderResult
 from rich.markdown import ListElement
 from rich.markdown import ListItem
 from rich.markdown import Markdown
 from rich.markdown import Paragraph
+from rich.markdown import TableElement
 from rich.segment import Segment
 from rich.segment import Segments
 from rich.rule import Rule
+import rich.box
 
 from escpos import printer
 from stransi.attribute import Attribute
@@ -109,12 +113,26 @@ def remove_macros(text):
   return text
 
 
-class MyConsole(Console):
+ASCII_SIMPLE_BOX = rich.box.Box(
+    "    \n"
+    "    \n"
+    " -- \n"
+    "    \n"
+    "    \n"
+    " -- \n"
+    "    \n"
+    "    \n",
+    ascii=True,
+)
+
+class MyTableElement(TableElement):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-  @property
-  def encoding(self) -> str:
-    return "latin_1"
+  def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
+    for table in super().__rich_console__(console, options):
+      #table.box = ASCII_SIMPLE_BOX
+      table.box = rich.box.SIMPLE
+      yield table
 
 
 class Printer(AbstractContextManager):
@@ -124,11 +142,8 @@ class Printer(AbstractContextManager):
     ListElement.new_line = False
     ListItem.new_line = False
 
-    #buffer = io.BytesIO()
-    #file = io.TextIOWrapper(buffer, encoding='latin_1', errors=None, write_through=True)
     file = io.StringIO()
-
-    self.console = MyConsole(
+    self.console = Console(
         file=file,
         force_terminal=True,
         width=ARGS.text_width,
@@ -142,15 +157,13 @@ class Printer(AbstractContextManager):
 
   def __exit__(self, exc_type: type[BaseException] | None, exc_value:
                BaseException | None, traceback: TracebackType | None) -> None:
-    #captured = self.console.file.buffer.getvalue()
     captured = self.console.file.getvalue()
+
     if ARGS.print_preview:
       p = printer.Dummy(profile=ARGS.print_profile)
       self.ansi_to_escpos(captured, p)
-      #print(p.output.decode('latin_1'))
       print(p.output)
     else:
-      #print(captured.decode('latin_1'))
       print(captured)
 
   @staticmethod
@@ -168,10 +181,16 @@ class Printer(AbstractContextManager):
     md = self.html_to_md(html)
     if not md:
       return
-    self.console.print(Markdown(md))
+    self.print_markdown(md)
+
+  def print_markdown(self, markup):
+    md = Markdown(markup)
+    md.elements["table_open"] = MyTableElement
+    self.console.print(md)
 
   def print_hr(self):
-    self.console.print(Rule(characters='-'))
+    # ─ should get converted to cp437/0xc4
+    self.console.print(Rule(characters='─'))
 
   def render_item(self, marker, text):
     opts = self.console.options.update_width(ARGS.text_width - len(marker))
@@ -196,11 +215,7 @@ class Printer(AbstractContextManager):
         continue
       self.print_hr()
       self.print(heading)
-      self.console.print(Markdown(md))
-
-# @staticmethod
-# def unicode_to_ascii(s):
-#   return s.replace('•', '*')
+      self.print_markdown(md)
 
   @staticmethod
   def ansi_to_escpos(ansi, printer):
@@ -218,6 +233,8 @@ class Printer(AbstractContextManager):
           printer.set(bold=True)
         elif i.attribute == Attribute.UNDERLINE:
           printer.set(underline=True)
+        elif i.attribute == Attribute.ITALIC:
+          printer.set(bold=True)  # map italic to bold.
         else:
           raise Exception(f"unknown attribute {i.attribute}: {i}")
       else:
