@@ -38,6 +38,7 @@ def print_creature(data, printer):
   if atr['speed']['otherSpeeds']:
     os = [f"{os['type']} {os['value']}" for os in atr['speed']['otherSpeeds']]
     os = f" ({', '.join(os)})"
+  # TODO ['ac']['details']
   printer.print(f"AC {atr['ac']['value']}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
 
   perc = stm['perception']
@@ -50,6 +51,7 @@ def print_creature(data, printer):
 
   # TODO languages
   # TODO skills
+  # TODO immunities
 
   items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
   for i in items:
