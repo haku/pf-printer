@@ -102,7 +102,12 @@ class Printer(AbstractContextManager):
     html = html.replace('\n', '')
     return markdownify(html, strip=['hr'])
 
+  def println(self):
+    self.console.print("", emoji=False, markup=False)
+
   def print(self, text):
+    if not text:
+      return
     self.console.print(text, emoji=False, markup=False)
 
   def print_html(self, html):

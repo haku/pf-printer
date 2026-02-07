@@ -11,7 +11,7 @@ def print_recipe(data, printer):
   printer.print(f"{data['id']}: {data['name']}");
 
   for num, step in enumerate(data['steps']):
-    printer.print("")
+    printer.println()
     printer.print(f"Step {num}")
 
     for ing in step['ingredients']:
