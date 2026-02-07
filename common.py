@@ -1,4 +1,3 @@
-import argparse
 import io
 import json
 import pathlib
@@ -27,34 +26,13 @@ from escpos import printer
 from stransi.attribute import Attribute
 import stransi
 
+from args import ARGS
 
-class Args:
-  def __init__(self):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--json", dest='json_path',  type=pathlib.Path)
-    parser.add_argument("--width", dest='text_width', type=int, default=56)
-    parser.add_argument("--details", dest='show_details', action="store_true")
-    parser.add_argument("--preview", dest='print_preview', action="store_true")
-    parser.add_argument("--printer", dest='print_profile', default="TM-T88II")
-    self.parser = parser
-    self.args = None
-
-  def __getattr__(self, name):
-    if not self.args:
-      self.args = self.parser.parse_args()
-    return self.args.__getattribute__(name)
-
-  def get_required(self, name):
-    val = self.__getattr__(name)
-    if not val:
-      self.need_arg(name)
-    return val
-
-  def need_arg(self, name):
-    print(f"Missing arg: --{name}")
-    sys.exit(1)
-
-ARGS = Args()
+ARGS.add_argument("--json", dest='json_path',  type=pathlib.Path)
+ARGS.add_argument("--width", dest='text_width', type=int, default=56)
+ARGS.add_argument("--details", dest='show_details', action="store_true")
+ARGS.add_argument("--preview", dest='print_preview', action="store_true")
+ARGS.add_argument("--printer", dest='print_profile', default="TM-T88II")
 
 
 class RDict(dict):

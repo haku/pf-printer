@@ -4,7 +4,7 @@ import re
 from operator import itemgetter
 
 import common
-from common import ARGS
+from args import ARGS
 from common import space
 
 

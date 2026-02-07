@@ -3,7 +3,7 @@
 import requests
 
 import common
-from common import ARGS
+from args import ARGS
 from common import space
 
 def print_recipe(data, printer):
@@ -32,8 +32,8 @@ def print_recipe(data, printer):
     #printer.print(step['instruction'])
     printer.print_html(step['instructions_markdown'])
 
-ARGS.parser.add_argument("--url", required=True)
-ARGS.parser.add_argument("--token", required=True)
+ARGS.add_argument("--url", required=True)
+ARGS.add_argument("--token", required=True)
 
 req = requests.get(ARGS.url, headers={"Authorization": f"Bearer {ARGS.token}"})
 data = req.json()
