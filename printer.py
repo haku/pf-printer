@@ -25,7 +25,8 @@ from args import ARGS
 ARGS.add_argument("--width", dest='text_width', type=int, default=56)
 ARGS.add_argument("--details", dest='show_details', action="store_true")
 ARGS.add_argument("--preview", dest='print_preview', action="store_true")
-ARGS.add_argument("--printer", dest='print_profile', default="TM-T88II")
+ARGS.add_argument("--profile", dest='print_profile', default="TM-T88II")
+ARGS.add_argument("--printer", dest='print_addr')
 
 
 ASCII_SIMPLE_BOX = rich.box.Box(
@@ -78,6 +79,10 @@ class Printer(AbstractContextManager):
       p = printer.Dummy(profile=ARGS.print_profile)
       self.ansi_to_escpos(captured, p)
       print(p.output)
+    elif ARGS.print_addr:
+      p = printer.Network(ARGS.print_addr, profile=ARGS.print_profile)
+      self.ansi_to_escpos(captured, p)
+      p.cut()
     else:
       print(captured)
 
