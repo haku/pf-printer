@@ -67,7 +67,7 @@ class RDict(dict):
 
 def to_rdict(d):
   if isinstance(d, dict):
-    return RDict({k: to_rdict(v) for k, v in d.items()})
+    return RDict({k: to_rdict(v) for k, v in d.items() if v is not None})
   if isinstance(d, list):
     return [to_rdict(i) for i in d]
   else:

@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+import requests
+
+import common
+from common import ARGS
+from common import space
+
+def print_recipe(data, printer):
+  printer.print(f"{data['id']}: {data['name']}");
+
+  for num, step in enumerate(data['steps']):
+    printer.print("")
+    printer.print(f"Step {num}")
+
+    for ing in step['ingredients']:
+      amt = space(
+          f"{ing['amount']:g}" if ing['amount'] else None,
+          ing['unit']['name'])
+      amt = f"**{amt}**" if amt else None
+
+      note = ing['note']
+      note = f"({note})" if note else None
+
+      printer.print_markdown(space(
+        "*",
+        amt,
+        ing['food']['name'],
+        note,
+        ))
+
+    #printer.print(step['instruction'])
+    printer.print_html(step['instructions_markdown'])
+
+ARGS.parser.add_argument("--url", required=True)
+ARGS.parser.add_argument("--token", required=True)
+
+req = requests.get(ARGS.url, headers={"Authorization": f"Bearer {ARGS.token}"})
+data = req.json()
+data = common.to_rdict(data)
+with common.Printer() as p:
+  print_recipe(data, p)
