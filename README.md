@@ -17,8 +17,8 @@ Usage
 Example usage:
 ```shell
 # preview in console
-./print-item --json ~/3src/pf2e/packs/pf2e/equipment/healing-potion-lesser.json
-./print-creature --json ~/3src/pf2e/pathfinder-monster-core/mitflit.json --details
+./print-item     --json ~/3src/pf2e/packs/pf2e/equipment/healing-potion-lesser.json
+./print-creature --json ~/3src/pf2e/packs/pf2e/pathfinder-monster-core/mitflit.json --details
 
 # preview what will be sent to printer
 ./print-creature --json .../thing.json --details --preview
