@@ -69,7 +69,14 @@ def print_creature(data, printer):
         )
       for w in weak])))
 
-  # TODO languages
+  lang = stm['details']['languages']
+  if lang:
+    printer.print(space(
+      "lang:",
+      com(*lang['value']),
+      lang['details'],
+      ))
+
   # TODO skills
 
   items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
