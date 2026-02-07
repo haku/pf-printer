@@ -4,6 +4,7 @@ import re
 from operator import itemgetter
 
 import common
+import printer
 import rdata
 from args import ARGS
 from common import space
@@ -96,10 +97,10 @@ def print_creature(data, printer):
     return
 
   printer.print_heading_and_html([
-    (i['heading'], i['system']['description']['value'])
+    (i['heading'], common.remove_macros(i['system']['description']['value']))
     for i in items])
 
 
 data = rdata.read_json()
-with common.Printer() as p:
+with printer.Printer() as p:
   print_creature(data, p)

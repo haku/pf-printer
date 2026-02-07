@@ -4,6 +4,7 @@ import re
 from operator import itemgetter
 
 import common
+import printer
 import rdata
 from common import space
 
@@ -51,9 +52,9 @@ def print_item(data, printer):
     printer.print(f"{dmg['formula']} ({space(dmg['kind'], dmg['type'], sep=', ')})");
 
   printer.print_hr()
-  printer.print_html(stm['description']['value'])
+  printer.print_html(common.remove_macros(stm['description']['value']))
 
 
 data = rdata.read_json()
-with common.Printer() as p:
+with printer.Printer() as p:
   print_item(data, p)
