@@ -30,6 +30,18 @@ def hp(h):
     return f"{m} hp"
   return None
 
+def damage(d):
+  if not d:
+    return None
+  amt = space(
+    d['formula'],
+    f"{d['dice']}{d['die']}" if d['die'] else None,
+    )
+  if not amt:
+    return None
+  typ = space(d['kind'], d['type'], d['damageType'], sep=', ')
+  return f"{amt} ({typ})"
+
 def print_item(data, printer):
   stm = data['system']
 
@@ -47,9 +59,10 @@ def print_item(data, printer):
 
   #TODO material quantity uses
 
-  dmg = stm['damage']
-  if dmg:
-    printer.print(f"{dmg['formula']} ({space(dmg['kind'], dmg['type'], sep=', ')})");
+  printer.print(space(
+    damage(stm['meleeUsage']['damage']),
+    damage(stm['damage']),
+    sep=', '))
 
   printer.print_hr()
   printer.print_html(misc.remove_macros(stm['description']['value']))
