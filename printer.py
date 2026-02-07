@@ -125,6 +125,11 @@ class Printer(AbstractContextManager):
     # ─ should get converted to cp437/0xc4
     self.console.print(Rule(characters='─'))
 
+  def print_item(self, marker, text):
+    if not text:
+      return
+    self.print(self.render_item(f"{marker} ", text))
+
   def render_item(self, marker, text):
     opts = self.console.options.update_width(self.width - len(marker))
     lines = self.console.render_lines(text, options=opts, pad=False)
