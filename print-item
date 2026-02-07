@@ -3,10 +3,10 @@
 import re
 from operator import itemgetter
 
-import common
+import misc
 import printer
 import rdata
-from common import space
+from misc import space
 
 def price(p):
   v = p['value']
@@ -38,7 +38,7 @@ def print_item(data, printer):
     suffix(stm['acBonus'], 'AC'),
     suffix(stm['checkPenalty'], 'CP'),
     stm['category'],
-    common.level(stm['level']),
+    misc.level(stm['level']),
     price(stm['price']),
     suffix(stm['bulk']['value'], 'bulk'),
     suffix(stm['hardness'], 'hrd'),
@@ -52,7 +52,7 @@ def print_item(data, printer):
     printer.print(f"{dmg['formula']} ({space(dmg['kind'], dmg['type'], sep=', ')})");
 
   printer.print_hr()
-  printer.print_html(common.remove_macros(stm['description']['value']))
+  printer.print_html(misc.remove_macros(stm['description']['value']))
 
 
 data = rdata.read_json()

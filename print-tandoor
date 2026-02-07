@@ -2,11 +2,10 @@
 
 import requests
 
-import common
 import printer
 import rdata
 from args import ARGS
-from common import space
+from misc import space
 
 def print_recipe(data, printer):
   printer.print(f"{data['id']}: {data['name']}");
