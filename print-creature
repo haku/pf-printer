@@ -4,6 +4,7 @@ import re
 from operator import itemgetter
 
 import common
+import rdata
 from args import ARGS
 from common import space
 
@@ -99,6 +100,6 @@ def print_creature(data, printer):
     for i in items])
 
 
-data = common.read_json()
+data = rdata.read_json()
 with common.Printer() as p:
   print_creature(data, p)

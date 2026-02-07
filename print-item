@@ -4,6 +4,7 @@ import re
 from operator import itemgetter
 
 import common
+import rdata
 from common import space
 
 def price(p):
@@ -53,6 +54,6 @@ def print_item(data, printer):
   printer.print_html(stm['description']['value'])
 
 
-data = common.read_json()
+data = rdata.read_json()
 with common.Printer() as p:
   print_item(data, p)

@@ -3,6 +3,7 @@
 import requests
 
 import common
+import rdata
 from args import ARGS
 from common import space
 
@@ -37,6 +38,6 @@ ARGS.add_argument("--token", required=True)
 
 req = requests.get(ARGS.url, headers={"Authorization": f"Bearer {ARGS.token}"})
 data = req.json()
-data = common.to_rdict(data)
+data = rdata.to_rdict(data)
 with common.Printer() as p:
   print_recipe(data, p)
