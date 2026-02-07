@@ -4,6 +4,7 @@ import io
 
 from escpos import printer
 from markdownify import markdownify
+from rich.align import Align
 from rich.console import Console
 from rich.console import ConsoleOptions
 from rich.console import NewLine
@@ -105,10 +106,13 @@ class Printer(AbstractContextManager):
   def println(self):
     self.console.print("", emoji=False, markup=False)
 
-  def print(self, text):
+  def print(self, text, style=None):
     if not text:
       return
-    self.console.print(text, emoji=False, markup=False)
+    self.console.print(text, emoji=False, markup=False, style=style)
+
+  def print_title(self, text):
+    self.print(Align.center(text), style="bold")
 
   def print_html(self, html):
     md = self.html_to_md(html)

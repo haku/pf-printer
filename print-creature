@@ -33,7 +33,7 @@ def ac(ac):
   return space(f"AC {ac['value']}", ac['details'])
 
 def print_creature(data, printer):
-  printer.print(data['name']);
+  printer.print_title(data['name']);
   stm = data['system']
 
   abl = stm['abilities']

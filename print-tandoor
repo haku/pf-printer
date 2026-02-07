@@ -8,7 +8,7 @@ from args import ARGS
 from misc import space
 
 def print_recipe(data, printer):
-  printer.print(f"{data['id']}: {data['name']}");
+  printer.print_title(f"{data['id']}: {data['name']}");
 
   for num, step in enumerate(data['steps']):
     printer.println()
