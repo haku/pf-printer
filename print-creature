@@ -38,13 +38,13 @@ def print_creature(data, printer):
 
   abl = stm['abilities']
   stats = [f"{a.upper()} {abl[a]['mod']}" for a in ['str', 'dex', 'con', 'int', 'wis', 'cha']]
-  printer.print(com(stats))
+  printer.print(com(*stats))
 
   atr = stm['attributes']
   os = ''
   if atr['speed']['otherSpeeds']:
     os = [f"{os['type']} {os['value']}" for os in atr['speed']['otherSpeeds']]
-    os = f" ({com(os)})"
+    os = f" ({com(*os)})"
   printer.print(f"{ac(atr['ac'])}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
 
   perc = stm['perception']
@@ -53,14 +53,14 @@ def print_creature(data, printer):
 
   svs = stm['saves']
   stats = [f"{a[:4]} {svs[a]['value']}{svs[a]['saveDetail']}" for a in ['fortitude', 'reflex', 'will']]
-  printer.print(com(stats))
+  printer.print(com(*stats))
 
   printer.print_item("immune:", com(*[i['type'] for i in atr['immunities']]))
   printer.print_item("weak:", com(*[
     space(
       w['type'],
       w['value'],
-      prefix(com([e for e in w['exceptions']]), "except "),  # untested
+      prefix(com(*[e for e in w['exceptions']]), "except "),  # untested
       )
     for w in atr['weaknesses']]))
 
@@ -91,7 +91,7 @@ def print_creature(data, printer):
 
     if 'damageRolls' in s:
       dmg = [f"{d['damage']}{d['damageType'][0]}" for d in s['damageRolls'].values()]
-      title += f" {com(dmg)}"
+      title += f" {com(*dmg)}"
 
     if s['level']:
       title += f" {misc.level(s['level'])}"
@@ -102,7 +102,7 @@ def print_creature(data, printer):
       title += f" ({s['duration']['value']})"
 
     if s['attackEffects']['value']:
-      title += f" --> {com(s['attackEffects']['value'])}"
+      title += f" --> {com(*s['attackEffects']['value'])}"
 
     i['heading'] = printer.render_item(marker, title)
     printer.print(i['heading'])
