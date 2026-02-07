@@ -6,6 +6,7 @@ from operator import itemgetter
 import misc
 import printer
 import rdata
+from misc import com
 from misc import space
 
 def price(p):
@@ -39,14 +40,14 @@ def damage(d):
     )
   if not amt:
     return None
-  typ = space(d['kind'], d['type'], d['damageType'], sep=', ')
+  typ = com(d['kind'], d['type'], d['damageType'])
   return f"{amt} ({typ})"
 
 def print_item(data, printer):
   stm = data['system']
 
   printer.print(data['name']);
-  printer.print(space(
+  printer.print(com(
     suffix(stm['acBonus'], 'AC'),
     suffix(stm['checkPenalty'], 'CP'),
     stm['category'],
@@ -55,19 +56,19 @@ def print_item(data, printer):
     suffix(stm['bulk']['value'], 'bulk'),
     suffix(stm['hardness'], 'hrd'),
     hp(stm['hp']),
-    sep=', '));
+    ));
 
   #TODO material quantity uses
 
-  printer.print(space(
+  printer.print(com(
     damage(stm['meleeUsage']['damage']),
     damage(stm['damage']),
-    sep=', '))
+    ))
 
-  printer.print(space(
+  printer.print(com(
     stm['traits']['rarity'],
     *stm['traits']['value'],
-    sep=', '))
+    ))
 
 
   printer.print_hr()

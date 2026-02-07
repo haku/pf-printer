@@ -7,6 +7,8 @@ import misc
 import printer
 import rdata
 from args import ARGS
+from misc import com
+from misc import prefix
 from misc import space
 
 
@@ -27,6 +29,9 @@ def parse_actions(t):
     except ValueError:
       return t
 
+def ac(ac):
+  return space(f"AC {ac['value']}", ac['details'])
+
 def print_creature(data, printer):
   printer.print(data['name']);
   stm = data['system']
@@ -40,20 +45,32 @@ def print_creature(data, printer):
   if atr['speed']['otherSpeeds']:
     os = [f"{os['type']} {os['value']}" for os in atr['speed']['otherSpeeds']]
     os = f" ({', '.join(os)})"
-  # TODO ['ac']['details']
-  printer.print(f"AC {atr['ac']['value']}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
+  printer.print(f"{ac(atr['ac'])}, HP {atr['hp']['value']}, speed {atr['speed']['value']}{os}")
 
   perc = stm['perception']
   sens = [space(a['type'], a['range'], a['acuity']) for a in perc['senses']]
-  printer.print(f"perc {perc['mod']} ({', '.join(sens)})")
+  printer.print(f"perc {perc['mod']} ({com(*sens)})")
 
   svs = stm['saves']
   stats = [f"{a[:4]} {svs[a]['value']}{svs[a]['saveDetail']}" for a in ['fortitude', 'reflex', 'will']]
   printer.print(', '.join(stats))
 
+  imu = atr['immunities']
+  if imu:
+    printer.print(space("immune:", com(*[i['type'] for i in imu])))
+
+  weak = atr['weaknesses']
+  if weak:
+    printer.print(space("weak:", com(*[
+      space(
+        w['type'],
+        w['value'],
+        prefix(com([e for e in w['exceptions']]), "except "),  # untested
+        )
+      for w in weak])))
+
   # TODO languages
   # TODO skills
-  # TODO immunities
 
   items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
   for i in items:
