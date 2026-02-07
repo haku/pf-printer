@@ -3,6 +3,7 @@ import io
 import json
 import pathlib
 import re
+import sys
 from collections import defaultdict
 from contextlib import AbstractContextManager
 from types import TracebackType
@@ -30,18 +31,28 @@ import stransi
 class Args:
   def __init__(self):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--json",  type=pathlib.Path, required=True)
-    parser.add_argument("--width", type=int, default=56)
-    parser.add_argument("--details", action="store_true")
-    parser.add_argument("--preview", action="store_true")
-    parser.add_argument("--printer", default="TM-T88II")
-    args = parser.parse_args()
+    parser.add_argument("--json", dest='json_path',  type=pathlib.Path)
+    parser.add_argument("--width", dest='text_width', type=int, default=56)
+    parser.add_argument("--details", dest='show_details', action="store_true")
+    parser.add_argument("--preview", dest='print_preview', action="store_true")
+    parser.add_argument("--printer", dest='print_profile', default="TM-T88II")
+    self.parser = parser
+    self.args = None
 
-    self.json_path = args.json
-    self.text_width = args.width
-    self.show_details = args.details
-    self.print_preview = args.preview
-    self.print_profile = args.printer
+  def __getattr__(self, name):
+    if not self.args:
+      self.args = self.parser.parse_args()
+    return self.args.__getattribute__(name)
+
+  def get_required(self, name):
+    val = self.__getattr__(name)
+    if not val:
+      self.need_arg(name)
+    return val
+
+  def need_arg(self, name):
+    print(f"Missing arg: --{name}")
+    sys.exit(1)
 
 ARGS = Args()
 
@@ -68,7 +79,7 @@ def read_json_file(path):
   return to_rdict(data)
 
 def read_json():
-  with open(ARGS.json_path, 'r') as f:
+  with open(ARGS.get_required('json_path'), 'r') as f:
     data = json.load(f)
   return to_rdict(data)
 
