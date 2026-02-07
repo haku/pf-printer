@@ -31,6 +31,12 @@ ARGS.add_argument("--printer", dest='print_addr')
 ARGS.add_argument("--font", dest='print_font', choices=['a', 'b'], default='b')
 
 
+TITLE_FONT = 'a'
+
+# in-band signalling to track font changes since terminals only have one font size.
+TITLE_MARKER = "␁"
+NORMAL_MARKER = "␂"
+
 ASCII_SIMPLE_BOX = rich.box.Box(
     "    \n"
     "    \n"
@@ -67,6 +73,9 @@ class Printer(AbstractContextManager):
       self.width = p.profile.get_columns(ARGS.print_font)
     if self.width < 10:
       raise Exception(f"invalid width: {self.width}")
+
+    self.title_width = min(self.width, p.profile.get_columns(TITLE_FONT))
+    self.format_to_print = ARGS.print_preview or ARGS.print_addr
 
     file = io.StringIO()
     self.console = Console(
@@ -112,7 +121,15 @@ class Printer(AbstractContextManager):
     self.console.print(text, emoji=False, markup=False, style=style)
 
   def print_title(self, text):
-    self.print(Align.center(text), style="bold")
+    title = Align.center(text)
+    if self.format_to_print:
+      opts = self.console.options.update_width(self.title_width)
+      segs = title.__rich_console__(self.console, opts)
+      segs = list(segs)
+      segs.insert(0, Segment(TITLE_MARKER))
+      segs.append(Segment(NORMAL_MARKER))
+      title = Segments(segs)
+    self.print(title, style="bold")
 
   def print_html(self, html):
     md = self.html_to_md(html)
@@ -163,10 +180,18 @@ class Printer(AbstractContextManager):
   def ansi_to_escpos(ansi, printer):
     decoded = stransi.Ansi(ansi)
     # https://python-escpos.readthedocs.io/en/latest/api/escpos.html#escpos.escpos.Escpos.set_with_default
-    printer.set_with_default(font="b")
+    printer.set_with_default(font=ARGS.print_font)
     for i in decoded.instructions():
       if isinstance(i, str):
+        if i.startswith(TITLE_MARKER):
+          printer.set(font=TITLE_FONT)
+          i = i[1:]
+        elif i.startswith(NORMAL_MARKER):
+          printer.set(font=ARGS.print_font)
+          i = i[1:]
+
         printer.text(i)
+
       elif isinstance(i, stransi.SetAttribute):
         # https://github.com/getcuia/stransi/blob/main/src/stransi/attribute.py
         if i.attribute == Attribute.NORMAL:
