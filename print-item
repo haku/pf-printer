@@ -8,17 +8,13 @@ import printer
 import rdata
 from misc import com
 from misc import space
+from misc import suffix
 
 def price(p):
   v = p['value']
   if not v:
     return None
   return space(*[f"{v[c]}{c}" for c in ['pp', 'gp', 'sp', 'cp'] if v[c]])
-
-def suffix(val, suf):
-  if not val:
-    return ''
-  return f"{val} {suf}"
 
 def hp(h):
   v = h['value']

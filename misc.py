@@ -11,6 +11,11 @@ def prefix(val, pre):
     return ''
   return f"{pre} {val}"
 
+def suffix(val, suf):
+  if not val:
+    return ''
+  return f"{val} {suf}"
+
 def level(l):
   if not l['value']:
     return None
