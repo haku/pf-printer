@@ -22,11 +22,12 @@ import stransi
 
 from args import ARGS
 
-ARGS.add_argument("--width", dest='text_width', type=int, default=56)
+ARGS.add_argument("--width", dest='text_width', type=int)
 ARGS.add_argument("--details", dest='show_details', action="store_true")
 ARGS.add_argument("--preview", dest='print_preview', action="store_true")
 ARGS.add_argument("--profile", dest='print_profile', default="TM-T88II")
 ARGS.add_argument("--printer", dest='print_addr')
+ARGS.add_argument("--font", dest='print_font', choices=['a', 'b'], default='b')
 
 
 ASCII_SIMPLE_BOX = rich.box.Box(
@@ -58,11 +59,19 @@ class Printer(AbstractContextManager):
     ListElement.new_line = False
     ListItem.new_line = False
 
+    if ARGS.text_width:
+      self.width = ARGS.text_width
+    else:
+      p = printer.Dummy(profile=ARGS.print_profile)
+      self.width = p.profile.get_columns(ARGS.print_font)
+    if self.width < 10:
+      raise Exception(f"invalid width: {self.width}")
+
     file = io.StringIO()
     self.console = Console(
         file=file,
         force_terminal=True,
-        width=ARGS.text_width,
+        width=self.width,
         highlight=False,
         markup=False,
         no_color=True,
@@ -112,7 +121,7 @@ class Printer(AbstractContextManager):
     self.console.print(Rule(characters='─'))
 
   def render_item(self, marker, text):
-    opts = self.console.options.update_width(ARGS.text_width - len(marker))
+    opts = self.console.options.update_width(self.width - len(marker))
     lines = self.console.render_lines(text, options=opts, pad=False)
     ret = []
 
