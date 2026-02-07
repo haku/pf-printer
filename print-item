@@ -64,6 +64,12 @@ def print_item(data, printer):
     damage(stm['damage']),
     sep=', '))
 
+  printer.print(space(
+    stm['traits']['rarity'],
+    *stm['traits']['value'],
+    sep=', '))
+
+
   printer.print_hr()
   printer.print_html(misc.remove_macros(stm['description']['value']))
 
