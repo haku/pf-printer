@@ -1,5 +1,47 @@
 import re
 
+from formatting import com
+from formatting import space
+
+def actions(system):
+  if system['actions']['value']:
+    return parse_actions(system['actions']['value'])
+  elif system['actionType']['value']:
+    return parse_actions(system['actionType']['value'])
+  elif system['time']['value']:
+    return parse_actions(system['time']['value'])
+  else:
+    return '*'
+
+def parse_actions(t):
+  if t == 'reaction':
+    return '<-'
+  elif t == 'passive':
+    return '-'
+  elif t == "1 to 3":
+    return '*/**/***'
+  else:
+    m = re.match(r"(\d+) *(minutes?|hours?|days?)", str(t))
+    if m:
+      return f"{m.group(1)}{m.group(2)[:1]}"
+
+    try:
+      return '*' * int(t)
+    except ValueError:
+      return t
+
+def damage(d):
+  if not d:
+    return None
+  amt = space(
+    d['formula'],
+    f"{d['dice']}{d['die']}" if d['die'] else None,
+    )
+  if not amt:
+    return None
+  typ = com(d['kind'], d['type'], d['damageType'], d['category'])
+  return f"{amt} ({typ})"
+
 def level(l):
   if not l['value']:
     return None

@@ -12,23 +12,6 @@ from formatting import prefix
 from formatting import space
 
 
-def parse_actions(t):
-  if t == 'reaction':
-    return '<-'
-  elif t == 'passive':
-    return '-'
-  elif t == "1 to 3":
-    return '*/**/***'
-  else:
-    m = re.match(r"(\d+) *(minutes?|hours?|days?)", str(t))
-    if m:
-      return f"{m.group(1)}{m.group(2)[:1]}"
-
-    try:
-      return '*' * int(t)
-    except ValueError:
-      return t
-
 def ac(ac):
   return space(f"AC {ac['value']}", ac['details'])
 
@@ -73,15 +56,7 @@ def print_creature(data, printer):
   for i in items:
     s = i['system']
 
-    marker = ' ' * 10
-    if s['actions']['value']:
-      marker += parse_actions(s['actions']['value'])
-    elif s['actionType']['value']:
-      marker += parse_actions(s['actionType']['value'])
-    elif s['time']['value']:
-      marker += parse_actions(s['time']['value'])
-    else:
-      marker += '*'
+    marker = (' ' * 10) + pf.actions(s)
     marker = f"{marker[-10:]} "
 
     title = i['name']

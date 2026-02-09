@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+import re
+from operator import itemgetter
+
+import pf
+import printer
+import rdata
+from formatting import com
+from formatting import space
+from formatting import suffix
+
+
+def duration(d):
+  if not d['sustained']:
+    return None
+  return d['value']
+
+def print_spell(data, printer):
+  stm = data['system']
+
+  actions = pf.actions(stm)
+  printer.print_title(space(data['name'], actions));
+
+  # is ritual?
+
+  printer.print(com(
+    pf.level(stm['level']),
+    stm['target']['value'],
+    stm['range']['value'],
+    duration(stm['duration']),
+    *[pf.damage(v) for (k, v) in stm['damage'].items()],
+    ));
+
+  printer.print(com(
+    stm['traits']['rarity'],
+    *stm['traits']['traditions'],
+    *stm['traits']['value'],
+    ))
+
+  printer.print_hr()
+  printer.print_html(pf.remove_macros(stm['description']['value']))
+
+
+data = rdata.read_json()
+with printer.Printer() as p:
+  print_spell(data, p)
