@@ -7,9 +7,9 @@ import misc
 import printer
 import rdata
 from args import ARGS
-from misc import com
-from misc import prefix
-from misc import space
+from formatting import com
+from formatting import prefix
+from formatting import space
 
 
 def parse_actions(t):

@@ -5,7 +5,7 @@ import requests
 import printer
 import rdata
 from args import ARGS
-from misc import space
+from formatting import space
 
 def print_recipe(data, printer):
   printer.print_title(f"{data['id']}: {data['name']}");
