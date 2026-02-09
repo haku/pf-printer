@@ -3,7 +3,7 @@
 import re
 from operator import itemgetter
 
-import misc
+import pf
 import printer
 import rdata
 from args import ARGS
@@ -94,7 +94,7 @@ def print_creature(data, printer):
       title += f" {com(*dmg)}"
 
     if s['level']:
-      title += f" {misc.level(s['level'])}"
+      title += f" {pf.level(s['level'])}"
 
     if s['duration']['sustained']:
       title += f" (sustained)"
@@ -111,7 +111,7 @@ def print_creature(data, printer):
     return
 
   printer.print_heading_and_html([
-    (i['heading'], misc.remove_macros(i['system']['description']['value']))
+    (i['heading'], pf.remove_macros(i['system']['description']['value']))
     for i in items])
 
 

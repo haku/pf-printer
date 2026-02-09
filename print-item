@@ -3,7 +3,7 @@
 import re
 from operator import itemgetter
 
-import misc
+import pf
 import printer
 import rdata
 from formatting import com
@@ -47,7 +47,7 @@ def print_item(data, printer):
     suffix(stm['acBonus'], 'AC'),
     suffix(stm['checkPenalty'], 'CP'),
     stm['category'],
-    misc.level(stm['level']),
+    pf.level(stm['level']),
     price(stm['price']),
     suffix(stm['bulk']['value'], 'bulk'),
     suffix(stm['hardness'], 'hrd'),
@@ -68,7 +68,7 @@ def print_item(data, printer):
 
 
   printer.print_hr()
-  printer.print_html(misc.remove_macros(stm['description']['value']))
+  printer.print_html(pf.remove_macros(stm['description']['value']))
 
 
 data = rdata.read_json()
