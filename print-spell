@@ -39,7 +39,7 @@ def print_spell(data, printer):
     ))
 
   printer.print_hr()
-  printer.print_html(pf.remove_macros(stm['description']['value']))
+  printer.print_html(pf.remove_macros_html(stm['description']['value']))
 
 
 data = rdata.read_json()

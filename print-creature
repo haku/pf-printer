@@ -86,7 +86,7 @@ def print_creature(data, printer):
     return
 
   printer.print_heading_and_html([
-    (i['heading'], pf.remove_macros(i['system']['description']['value']))
+    (i['heading'], pf.remove_macros_html(i['system']['description']['value']))
     for i in items])
 
 

@@ -47,13 +47,18 @@ def level(l):
     return None
   return f"L{l['value']}"
 
-# TODO make bold?
-def remove_macros(text):
-  text = remove_at_macros(text)
-  text = remove_slash_macros(text)
+def remove_macros_html(text):
+  return remove_macros(text, lambda t: f"<strong>{t}</strong>")
+
+def remove_macros(text, formatter=None):
+  if not formatter:
+    formatter = lambda t: t
+
+  text = remove_at_macros(text, formatter)
+  text = remove_slash_macros(text, formatter)
   return text
 
-def remove_at_macros(text):
+def remove_at_macros(text, formatter):
   matches = re.finditer(r"@([^[]+)\[([^\]]+)\](?:\{([^}]+)\})?", text)
   for m in reversed(list(matches)):
     # @a[b]{c}
@@ -101,10 +106,10 @@ def remove_at_macros(text):
         rep = f"{p[0].replace('type:', '')}/{p[1]}"
     else:
       continue
-    text = text[:m.start()] + rep + text[m.end():]
+    text = text[:m.start()] + formatter(rep) + text[m.end():]
   return text
 
-def remove_slash_macros(text):
+def remove_slash_macros(text, formatter):
   matches = re.finditer(r"\[\[/([^ ]+)([^\]]+)]](?:\{([^}]+)\})?", text)
   for m in reversed(list(matches)):
     # [[/a b]]{c}
@@ -139,5 +144,5 @@ def remove_slash_macros(text):
 
     else:
       continue
-    text = text[:m.start()] + rep + text[m.end():]
+    text = text[:m.start()] + formatter(rep) + text[m.end():]
   return text
