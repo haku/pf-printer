@@ -21,7 +21,7 @@ def duration(d):
 
 def get_heightening(stm):
   if not ARGS.rank:
-    return None
+    return (None, None)
   if not stm['heightening']:
     raise Exception(f"heightening not supported.")
   if ARGS.rank <= stm['level']['value']:
@@ -30,56 +30,50 @@ def get_heightening(stm):
   heightening = stm['heightening']
   typ = heightening['type']
   if typ == 'interval':
-    return heightening
+    mul = (ARGS.rank - stm['level']['value']) / heightening['interval']
+    if not mul.is_integer():
+      raise Exception(f"invalid heightening rank: {ARGS.rank}")
+    mul = int(mul)
+    return (mul, heightening)
   elif typ == 'fixed':
     h = heightening['levels'][str(ARGS.rank)]
     if not h:
       raise Exception(f"rank {ARGS.rank} not defined for heightening, "
                       f"only: {list(heightening['levels'].keys())}")
-    return h
+    return (None, h)
 
   raise Exception(f"unknown heightening type: {typ}")
 
 def heighten_damage(stm):
-  heightening = stm['heightening']
-  if not heightening or not ARGS.rank:
-    return [pf.damage(v) for (k, v) in stm['damage'].items()]
-
-  typ = heightening['type']
-  if typ == 'interval':
-    return heighten_damage_interval(stm)
-  elif typ == 'fixed':
-    return heighten_damage_fixed(stm)
-  raise Exception(f"unknown heightening type: {typ}")
-
-def heighten_damage_interval(stm):
   damage = stm['damage']
-  h = get_heightening(stm)
-  times = (ARGS.rank - stm['level']['value']) / h['interval']
-  if not times.is_integer():
-    raise Exception(f"invalid heightening rank: {times}")
-  times = int(times)
-  return [pf.damage(d, dice.parse(h['damage'][k]).mul(times)) for k, d in damage.items()]
-
-def heighten_damage_fixed(stm):
-  damage = stm['damage']
-  h = get_heightening(stm)
+  hmul, h = get_heightening(stm)
   if not h:
-    raise Exception(f"heightening not defined when it should be.")
+    return [pf.damage(v) for (k, v) in damage.items()]
+  if hmul:
+    return [pf.damage(d, dice.parse(h['damage'][k]).mul(hmul)) for k, d in damage.items()]
   return [pf.damage(h['damage'][k]) for k, d in damage.items()]
 
 def heighten_target(stm):
-  h = get_heightening(stm)
+  _, h = get_heightening(stm)
   return h['target']['value'] if h else stm['target']['value']
 
 def heighten_range(stm):
-  h = get_heightening(stm)
+  _, h = get_heightening(stm)
   return h['range']['value'] if h else stm['range']['value']
 
 def heighten_area(stm):
-  h = get_heightening(stm)
-  a = h['area'] if h and h['area'] != 0 else stm['area']
-  return space(a['value'], a['type'])
+  val = stm['area']['value']
+  typ = stm['area']['type']
+
+  hmul, h = get_heightening(stm)
+  if h and h['area'] != 0:
+    if hmul and h['area']:
+      val += hmul * h['area']
+    else:
+      val = h['area']['value']
+      typ = h['area']['type']
+
+  return space(val, typ)
 
 def print_spell(data, printer):
   stm = data['system']
