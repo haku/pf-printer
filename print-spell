@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
-import re
 from operator import itemgetter
 
+import dice
 import pf
 import printer
 import rdata
+from args import ARGS
 from formatting import com
 from formatting import space
 from formatting import suffix
+
+ARGS.add_argument("--rank", type=int)
 
 
 def duration(d):
@@ -16,20 +19,86 @@ def duration(d):
     return None
   return d['value']
 
+def get_heightening(stm):
+  if not ARGS.rank:
+    return None
+  if not stm['heightening']:
+    raise Exception(f"heightening not supported.")
+  if ARGS.rank <= stm['level']['value']:
+    raise Exception(f"heightening rank is less than spell rank.")
+
+  heightening = stm['heightening']
+  typ = heightening['type']
+  if typ == 'interval':
+    return heightening
+  elif typ == 'fixed':
+    h = heightening['levels'][str(ARGS.rank)]
+    if not h:
+      raise Exception(f"rank {ARGS.rank} not defined for heightening, "
+                      f"only: {list(heightening['levels'].keys())}")
+    return h
+
+  raise Exception(f"unknown heightening type: {typ}")
+
+def heighten_damage(stm):
+  heightening = stm['heightening']
+  if not heightening or not ARGS.rank:
+    return [pf.damage(v) for (k, v) in stm['damage'].items()]
+
+  typ = heightening['type']
+  if typ == 'interval':
+    return heighten_damage_interval(stm)
+  elif typ == 'fixed':
+    return heighten_damage_fixed(stm)
+  raise Exception(f"unknown heightening type: {typ}")
+
+def heighten_damage_interval(stm):
+  damage = stm['damage']
+  h = get_heightening(stm)
+  times = (ARGS.rank - stm['level']['value']) / h['interval']
+  if not times.is_integer():
+    raise Exception(f"invalid heightening rank: {times}")
+  times = int(times)
+  return [pf.damage(d, dice.parse(h['damage'][k]).mul(times)) for k, d in damage.items()]
+
+def heighten_damage_fixed(stm):
+  damage = stm['damage']
+  h = get_heightening(stm)
+  if not h:
+    raise Exception(f"heightening not defined when it should be.")
+  return [pf.damage(h['damage'][k]) for k, d in damage.items()]
+
+def heighten_target(stm):
+  h = get_heightening(stm)
+  return h['target']['value'] if h else stm['target']['value']
+
+def heighten_range(stm):
+  h = get_heightening(stm)
+  return h['range']['value'] if h else stm['range']['value']
+
+def heighten_area(stm):
+  h = get_heightening(stm)
+  a = h['area'] if h else stm['area']
+  return space(a['value'], a['type'])
+
 def print_spell(data, printer):
   stm = data['system']
 
   actions = pf.actions(stm)
   printer.print_title(space(data['name'], actions));
+  # TODO is ritual?
 
-  # is ritual?
+  # TODO heighten target
+  printer.print(com(
+    f"R{ARGS.rank}" if ARGS.rank else pf.level(stm['level'], letter="R"),
+    heighten_target(stm),
+    heighten_range(stm),
+    heighten_area(stm),
+    duration(stm['duration']),
+    ));
 
   printer.print(com(
-    pf.level(stm['level']),
-    stm['target']['value'],
-    stm['range']['value'],
-    duration(stm['duration']),
-    *[pf.damage(v) for (k, v) in stm['damage'].items()],
+    *heighten_damage(stm),
     ));
 
   printer.print(com(

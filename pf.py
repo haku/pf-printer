@@ -1,5 +1,6 @@
 import re
 
+import dice
 from formatting import com
 from formatting import space
 
@@ -30,7 +31,7 @@ def parse_actions(t):
     except ValueError:
       return t
 
-def damage(d):
+def damage(d, add=None):
   if not d:
     return None
   amt = space(
@@ -39,13 +40,19 @@ def damage(d):
     )
   if not amt:
     return None
+
+  if add:
+    amt = dice.parse(amt)
+    amt = amt.append(add)
+    amt = space(*amt, sep="+")
+
   typ = com(d['kind'], d['type'], d['damageType'], d['category'])
   return f"{amt} ({typ})"
 
-def level(l):
+def level(l, letter="L"):
   if not l['value']:
     return None
-  return f"L{l['value']}"
+  return f"{letter}{l['value']}"
 
 def remove_macros_html(text):
   return remove_macros(text, lambda t: f"<strong>{t}</strong>")
