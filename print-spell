@@ -78,7 +78,7 @@ def heighten_range(stm):
 
 def heighten_area(stm):
   h = get_heightening(stm)
-  a = h['area'] if h else stm['area']
+  a = h['area'] if h and h['area'] != 0 else stm['area']
   return space(a['value'], a['type'])
 
 def print_spell(data, printer):
