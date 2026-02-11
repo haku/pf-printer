@@ -55,11 +55,13 @@ def heighten_damage(stm):
 
 def heighten_target(stm):
   _, h = get_heightening(stm)
-  return h['target']['value'] if h else stm['target']['value']
+  ht = h['target']['value'] if h else None
+  return ht or stm['target']['value']
 
 def heighten_range(stm):
   _, h = get_heightening(stm)
-  return h['range']['value'] if h else stm['range']['value']
+  hr = h['range']['value'] if h else None
+  return hr or stm['range']['value']
 
 def heighten_area(stm):
   val = stm['area']['value']
