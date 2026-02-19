@@ -19,6 +19,13 @@ def print_creature(data, printer):
   printer.print_title(data['name']);
   stm = data['system']
 
+  printer.print(com(
+    pf.level(stm['details']['level']),
+    stm['traits']['size']['value'],
+    stm['traits']['rarity'],
+    *stm['traits']['value'],
+  ))
+
   abl = stm['abilities']
   stats = [f"{a.upper()} {abl[a]['mod']}" for a in ['str', 'dex', 'con', 'int', 'wis', 'cha']]
   printer.print(com(*stats))
