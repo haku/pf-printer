@@ -30,7 +30,7 @@ def hp(h):
 def print_item(data, printer):
   stm = data['system']
 
-  printer.print_title(data['name']);
+  printer.print_title(data['name'])
   printer.print(com(
     suffix(stm['acBonus'], 'AC'),
     suffix(stm['checkPenalty'], 'CP'),
@@ -40,7 +40,7 @@ def print_item(data, printer):
     suffix(stm['bulk']['value'], 'bulk'),
     suffix(stm['hardness'], 'hrd'),
     hp(stm['hp']),
-    ));
+    ))
 
   #TODO material quantity uses
 
