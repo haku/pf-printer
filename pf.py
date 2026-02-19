@@ -50,7 +50,7 @@ def damage(d, add=None):
   return f"{amt} ({typ})"
 
 def level(l, letter="L"):
-  if not l['value']:
+  if l['value'] is None:
     return None
   return f"{letter}{l['value']}"
 
