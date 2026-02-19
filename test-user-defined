@@ -36,7 +36,7 @@ def mkchar(cols, rows, data):
         if y >= rows:
           byte += "0"
         else:
-          byte += "0" if s[row * 8 + bit][col] == " " else "1"
+          byte += "0" if s[y][col] == " " else "1"
       output += bytes([int(byte, 2)])
   return output
 
