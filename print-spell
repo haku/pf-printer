@@ -84,7 +84,6 @@ def print_spell(data, printer):
   printer.print_title(space(data['name'], actions));
   # TODO is ritual?
 
-  # TODO heighten target
   printer.print(com(
     f"R{ARGS.rank}" if ARGS.rank else pf.level(stm['level'], letter="R"),
     heighten_target(stm),
