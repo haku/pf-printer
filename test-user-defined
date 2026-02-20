@@ -40,6 +40,14 @@ def mkchar(cols, rows, data):
       output += bytes([int(byte, 2)])
   return output
 
+def prt_char(char):
+  prt([0x1b, b"&", 3, b"A", b"A"])
+  prt([12])
+  prt(char)
+  prt([0x1b, b"%", 1])
+  prt(b"A")
+  prt([0x1b, b"%", 0])
+
 
 pf_1act_a = mkchar(12, 24,
     "            "  #  0
@@ -119,32 +127,187 @@ box = mkchar(12, 24,
     "x          x"  # 22
     "xxxxxxxxxxxx"  # 23
     )
+blank_char = bytes([0] * 36)
+
+
+pf_fntb_act_a = mkchar(12, 24,
+    "            "  #  0
+    "            "  #  1
+    "            "  #  2
+    "            "  #  3
+    "            "  #  4
+    "            "  #  5
+    "            "  #  6
+    "       x    "  #  7
+    "      xxx   "  #  8
+    "     xxxxx  "  #  9
+    "    xxxxxxx "  # 10
+    "   xxxxxxxxx"  # 11
+    "    xxxxxxxx"  # 12
+    " xx  xxxxxxx"  # 13
+    "xxxx  xxxxxx"  # 14
+    "xxxx  xxxxxx"  # 15
+    " xx  xxxxxxx"  # 16
+    "    xxxxxxxx"  # 17
+    "   xxxxxxxxx"  # 18
+    "    xxxxxxx "  # 19
+    "     xxxxx  "  # 20
+    "      xxx   "  # 21
+    "       x    "  # 22
+    "            "  # 23
+    )
+pf_fntb_act_b = mkchar(12, 24,
+    "            "  #  0
+    "            "  #  1
+    "            "  #  2
+    "            "  #  3
+    "            "  #  4
+    "            "  #  5
+    "            "  #  6
+    "            "  #  7
+    "            "  #  8
+    "            "  #  9
+    "            "  # 10
+    "            "  # 11
+    "x           "  # 12
+    "xx          "  # 13
+    "xxx         "  # 14
+    "xxx         "  # 15
+    "xx          "  # 16
+    "x           "  # 17
+    "            "  # 18
+    "            "  # 19
+    "            "  # 20
+    "            "  # 21
+    "            "  # 22
+    "            "  # 23
+    )
+pf_fntb_act_c = mkchar(12, 24,
+    "            "  #  0
+    "            "  #  1
+    "            "  #  2
+    "            "  #  3
+    "            "  #  4
+    "            "  #  5
+    "            "  #  6
+    "            "  #  7
+    "     x      "  #  8
+    "    xxx     "  #  9
+    "   xxxxx    "  # 10
+    "  xxxxxxx   "  # 11
+    "x  xxxxxxx  "  # 12
+    "xx  xxxxxxx "  # 13
+    "xxx  xxxxxxx"  # 14
+    "xxx  xxxxxxx"  # 15
+    "xx  xxxxxxx "  # 16
+    "x  xxxxxxx  "  # 17
+    "  xxxxxxx   "  # 18
+    "   xxxxx    "  # 19
+    "    xxx     "  # 20
+    "     x      "  # 21
+    "            "  # 22
+    "            "  # 23
+    )
+pf_fntb_act_d = mkchar(12, 24,
+    "            "  #  0
+    "            "  #  1
+    "            "  #  2
+    "            "  #  3
+    "            "  #  4
+    "            "  #  5
+    "            "  #  6
+    "            "  #  7
+    "     x      "  #  8
+    "    xxx     "  #  9
+    "   xxxxx    "  # 10
+    "  xxxxxxx  x"  # 11
+    "x  xxxxxxx  "  # 12
+    "xx  xxxxxxx "  # 13
+    "xxx  xxxxxxx"  # 14
+    "xxx  xxxxxxx"  # 15
+    "xx  xxxxxxx "  # 16
+    "x  xxxxxxx  "  # 17
+    "  xxxxxxx  x"  # 18
+    "   xxxxx    "  # 19
+    "    xxx     "  # 20
+    "     x      "  # 21
+    "            "  # 22
+    "            "  # 23
+    )
+pf_fntb_act_e = mkchar(12, 24,
+    "            "  #  0
+    "            "  #  1
+    "            "  #  2
+    "            "  #  3
+    "            "  #  4
+    "            "  #  5
+    "            "  #  6
+    "            "  #  7
+    "            "  #  8
+    "  x         "  #  9
+    " xxx        "  # 10
+    "xxxxx       "  # 11
+    "xxxxxx      "  # 12
+    " xxxxxx     "  # 13
+    "  xxxxxx    "  # 14
+    "  xxxxxx    "  # 15
+    " xxxxxx     "  # 16
+    "xxxxxx      "  # 17
+    "xxxxx       "  # 18
+    " xxx        "  # 19
+    "  x         "  # 20
+    "            "  # 21
+    "            "  # 22
+    "            "  # 23
+    )
 
 print(pf_1act_a.hex())
 print(pf_1act_b.hex())
 print(box.hex())
+print(blank_char.hex())
+print(pf_fntb_act_a.hex())
+print(pf_fntb_act_b.hex())
+print(pf_fntb_act_c.hex())
+print(pf_fntb_act_d.hex())
+print(pf_fntb_act_e.hex())
+
 
 p.set_with_default(font="a")
-prt([0x1b, b"&", 3, b"A", b"A"])
-prt([12])
-prt(pf_1act_a)
+p.text("01234567890\n")
 
-prt([0x1b, b"%", 0])
-prt(b"A B C D E ")
-prt([0x1b, b"%", 1])
-prt(b"A B C D E")
-prt([0x0a])
+prt_char(pf_fntb_act_a)
+prt_char(pf_fntb_act_b)
+prt_char(blank_char)
+p.text(" 1 action\n")
+
+prt_char(pf_fntb_act_a)
+prt_char(pf_fntb_act_c)
+prt_char(blank_char)
+p.text(" 2 actions\n")
+
+prt_char(pf_fntb_act_a)
+prt_char(pf_fntb_act_d)
+prt_char(pf_fntb_act_e)
+p.text(" 3 actions\n")
+
 
 p.set(font="b")
-prt([0x1b, b"&", 3, b"A", b"A"])
-prt([12])
-prt(pf_1act_b)
+p.text("01234567890\n")
 
-prt([0x1b, b"%", 0])
-prt(b"A B C D E ")
-prt([0x1b, b"%", 1])
-prt(b"A B C D E")
-prt([0x0a])
+prt_char(pf_fntb_act_a)
+prt_char(pf_fntb_act_b)
+prt_char(blank_char)
+p.text(" 1 action\n")
+
+prt_char(pf_fntb_act_a)
+prt_char(pf_fntb_act_c)
+prt_char(blank_char)
+p.text(" 2 actions\n")
+
+prt_char(pf_fntb_act_a)
+prt_char(pf_fntb_act_d)
+prt_char(pf_fntb_act_e)
+p.text(" 3 actions\n")
 
 p.cut()
 
