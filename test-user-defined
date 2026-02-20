@@ -293,6 +293,7 @@ p.text(" 3 actions\n")
 
 p.set(font="b")
 p.text("01234567890\n")
+p.text("01234567890\n")
 
 prt_char(pf_fntb_act_a)
 prt_char(pf_fntb_act_b)
