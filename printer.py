@@ -17,6 +17,8 @@ from rich.markdown import TableElement
 from rich.rule import Rule
 from rich.segment import Segment
 from rich.segment import Segments
+from rich.style import Style
+from rich.text import Text
 from stransi.attribute import Attribute
 import rich.box
 import stransi
@@ -77,6 +79,8 @@ class Printer(AbstractContextManager):
     self.title_width = min(self.width, p.profile.get_columns(TITLE_FONT))
     self.format_to_print = ARGS.print_preview or ARGS.print_addr
 
+    self.renderables = []
+
     file = io.StringIO()
     self.console = Console(
         file=file,
@@ -92,6 +96,8 @@ class Printer(AbstractContextManager):
 
   def __exit__(self, exc_type: type[BaseException] | None, exc_value:
                BaseException | None, traceback: TracebackType | None) -> None:
+    for r in self.renderables:
+      self.console.print(r)
     captured = self.console.file.getvalue()
 
     if ARGS.print_preview:
@@ -113,23 +119,29 @@ class Printer(AbstractContextManager):
     return markdownify(html, strip=['hr'])
 
   def println(self):
-    self.console.print("", emoji=False, markup=False)
+    self.print("")
 
-  def print(self, text, style=None):
+  def print(self, text):
     if not text:
       return
-    self.console.print(text, emoji=False, markup=False, style=style)
+
+    if isinstance(text, str):
+      self.renderables.append(Segments([Segment(text), Segment.line()]))
+    elif isinstance(text, Segments):
+      self.renderables.append(text)
+    else:
+      raise Exception(f"can not print type {type(text)}: {text}")
 
   def print_title(self, text):
-    title = Align.center(text)
+    title = Text(text, style=Style(bold=True))
+    width = self.title_width if self.format_to_print else self.width
+    title.align("center", width)
+
+    segs = [title]
     if self.format_to_print:
-      opts = self.console.options.update_width(self.title_width)
-      segs = title.__rich_console__(self.console, opts)
-      segs = list(segs)
       segs.insert(0, Segment(TITLE_MARKER))
-      segs.append(Segment(NORMAL_MARKER))
-      title = Segments(segs)
-    self.print(title, style="bold")
+      segs.append(Segment(NORMAL_MARKER, style=Style(bold=True)))
+    self.renderables.append(Segments(segs))
 
   def print_html(self, html):
     md = self.html_to_md(html)
@@ -140,11 +152,11 @@ class Printer(AbstractContextManager):
   def print_markdown(self, markup):
     md = Markdown(markup)
     md.elements["table_open"] = MyTableElement
-    self.console.print(md)
+    self.renderables.append(md)
 
   def print_hr(self):
     # ─ should get converted to cp437/0xc4
-    self.console.print(Rule(characters='─'))
+    self.renderables.append(Rule(characters='─'))
 
   def print_item(self, marker, text):
     if not text:
