@@ -59,6 +59,8 @@ def print_creature(data, printer):
 
   # TODO skills
 
+  printer.print_hr()
+
   items = sorted(data['items'], key=itemgetter('sort'), reverse=True)
   for i in items:
     s = i['system']
