@@ -6,9 +6,9 @@ class Udchars:
   def print_placeholder(self, printer):
     printer.text(self.placeholder)
 
-  def print_to_printer(self, printer, font: str):
+  def print_to_printer(self, printer, font: str, times: int = 1):
     for char in self.chars:
-      char.print_char(printer, font)
+      char.print_char(printer=printer, font=font, times=times)
 
   @staticmethod
   def split_chars(char_count: int, pcols: int, prows: int, pattern: str):
