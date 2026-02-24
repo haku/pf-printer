@@ -2,7 +2,7 @@
 import sys
 from args import ARGS
 from escpos import printer
-from pf_icons import ACTIONS_FREE, ACTIONS_1, ACTIONS_2, ACTIONS_3
+from pf_icons import ACTIONS_FREE, ACTIONS_1, ACTIONS_2, ACTIONS_3, ACTIONS_REACTION
 from udchar import Udchars
 
 ARGS.add_argument("--profile", dest='print_profile', default="TM-T88II")
@@ -85,6 +85,8 @@ ACTIONS_2.print_to_printer(p, "b")
 p.text(" 2 actions\n")
 ACTIONS_3.print_to_printer(p, "b")
 p.text(" 3 actions\n")
+ACTIONS_REACTION.print_to_printer(p, "b")
+p.text(" reaction\n")
 
 p.cut()
 

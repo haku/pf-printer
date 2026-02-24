@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+import sys
+from PIL import Image
+img = Image.open(sys.argv[1])
+img = img.convert("L")
+width, height = img.size
+pixels = img.load()
+for y in range(height):
+  for x in range(width):
+    v = pixels[x, y]
+    print(" " if v > 30 else "x", end="")
+  print("")

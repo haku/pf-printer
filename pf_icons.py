@@ -108,3 +108,30 @@ ACTIONS_3 = Udchars("*** ", 9, 24,
     "      xxxx        xx                "  # 22
     "       xx                           "  # 23
     )
+ACTIONS_REACTION = Udchars("<-  ", 9, 24,
+    #0         0         0         0    5
+    "         xxxxxxxxxxx                "  #  0
+    "      xxxxxxxxxxxxxxxxx             "  #  1
+    "    xxxxxxxxxxxxxxxxxxxxx           "  #  2
+    "   xxxxxx    xxxxxxxxxxxxx          "  #  3
+    "  xxxx           xxxxxxxxxx         "  #  4
+    " xx                xxxxxxxxx        "  #  5
+    "x                   xxxxxxxxx       "  #  6
+    "                     xxxxxxxx       "  #  7
+    "                      xxxxxxxx      "  #  8
+    "                      xxxxxxxx      "  #  9
+    "                       xxxxxxx      "  # 10
+    "                       xxxxxxx      "  # 11
+    "                       xxxxxxx      "  # 12
+    "                       xxxxxx       "  # 13
+    "                      xxxxxxx       "  # 14
+    "            xxxxx     xxxxxx        "  # 15
+    "          xxxxxx     xxxxxx         "  # 16
+    "        xxxxxxx    xxxxxxx          "  # 17
+    "      xxxxxxxxxxxxxxxxxx            "  # 18
+    "     xxxxxxxxxxxxxxxxx              "  # 19
+    "      xxxxxxxxxxxxxx                "  # 20
+    "        xxxxxxx                     "  # 21
+    "          xxxxxx                    "  # 22
+    "            xxxxx                   "  # 23
+    )
