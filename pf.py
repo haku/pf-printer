@@ -1,10 +1,12 @@
 import re
 
 import dice
+import pf_icons
 from formatting import com
 from formatting import space
+from udchar import Udchars
 
-def actions(system):
+def actions(system) -> str | Udchars:
   if system['actions']['value']:
     return parse_actions(system['actions']['value'])
   elif system['actionType']['value']:
@@ -12,24 +14,26 @@ def actions(system):
   elif system['time']['value']:
     return parse_actions(system['time']['value'])
   else:
-    return '*'
+    return pf_icons.ACTIONS_1
 
-def parse_actions(t):
+def parse_actions(t) -> str | Udchars:
   if t == 'reaction':
-    return '<-'
+    return pf_icons.ACTIONS_REACTION
   elif t == 'passive':
     return '-'
+  elif t == 1 or t == "1":
+    return pf_icons.ACTIONS_1
+  elif t == 2 or t == "2":
+    return pf_icons.ACTIONS_2
+  elif t == 3 or 2 == "3":
+    return pf_icons.ACTIONS_3
   elif t == "1 to 3":
-    return '*/**/***'
+    return pf_icons.ACTIONS_123
   else:
     m = re.match(r"(\d+) *(minutes?|hours?|days?)", str(t))
     if m:
       return f"{m.group(1)}{m.group(2)[:1]}"
-
-    try:
-      return '*' * int(t)
-    except ValueError:
-      return t
+    return t
 
 def damage(d, add=None):
   if not d:

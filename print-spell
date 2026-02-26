@@ -81,7 +81,7 @@ def print_spell(data, printer):
   stm = data['system']
 
   actions = pf.actions(stm)
-  printer.print_title(space(data['name'], actions));
+  printer.print_title([data['name'], " ", actions]);
   # TODO is ritual?
 
   printer.print(com(

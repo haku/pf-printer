@@ -3,8 +3,11 @@ class Udchars:
     self.placeholder = placeholder
     self.chars = self.split_chars(len(placeholder), pcols, prows, pattern)
 
-  def print_placeholder(self, printer):
-    printer.text(self.placeholder)
+  def __len__(self):
+    return len(self.placeholder)
+
+  def __str__(self):
+    return self.placeholder
 
   def print_to_printer(self, printer, font: str, times: int = 1):
     for char in self.chars:

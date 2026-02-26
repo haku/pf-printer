@@ -45,8 +45,8 @@ def print_creature(data, printer):
   stats = [f"{a[:4]} {svs[a]['value']}{svs[a]['saveDetail']}" for a in ['fortitude', 'reflex', 'will']]
   printer.print(com(*stats))
 
-  printer.print_item("immune:", com(*[i['type'] for i in atr['immunities']]))
-  printer.print_item("weak:", com(*[
+  printer.print_item("immune: ", com(*[i['type'] for i in atr['immunities']]))
+  printer.print_item("weak: ", com(*[
     space(
       w['type'],
       w['value'],
@@ -55,7 +55,7 @@ def print_creature(data, printer):
     for w in atr['weaknesses']]))
 
   lang = stm['details']['languages']
-  printer.print_item("lang:", com(*lang['value'], lang['details']))
+  printer.print_item("lang: ", com(*lang['value'], lang['details']))
 
   # TODO skills
 
@@ -65,8 +65,8 @@ def print_creature(data, printer):
   for i in items:
     s = i['system']
 
-    marker = (' ' * 10) + pf.actions(s)
-    marker = f"{marker[-10:]} "
+    actions = pf.actions(s)
+    marker = [' ' * (10 - len(actions)), actions, " "]
 
     title = i['name']
 

@@ -27,7 +27,7 @@ ACTIONS_FREE = Udchars("free", 9, 24,
     "      xxxx                          "  # 22
     "       xx                           "  # 23
     )
-ACTIONS_1 = Udchars("*   ", 9, 24,
+ACTIONS_1 = Udchars("   *", 9, 24,
     #0         0         0         0    5
     "                                    "  #  0
     "                                    "  #  1
@@ -54,7 +54,7 @@ ACTIONS_1 = Udchars("*   ", 9, 24,
     "      xxxx                          "  # 22
     "       xx                           "  # 23
     )
-ACTIONS_2 = Udchars("**  ", 9, 24,
+ACTIONS_2 = Udchars("  **", 9, 24,
     #0         0         0         0    5
     "                                    "  #  0
     "                                    "  #  1
@@ -81,7 +81,7 @@ ACTIONS_2 = Udchars("**  ", 9, 24,
     "      xxxx        xx                "  # 22
     "       xx                           "  # 23
     )
-ACTIONS_3 = Udchars("*** ", 9, 24,
+ACTIONS_3 = Udchars(" ***", 9, 24,
     #0         0         0         0    5
     "                                    "  #  0
     "                                    "  #  1
@@ -108,7 +108,34 @@ ACTIONS_3 = Udchars("*** ", 9, 24,
     "      xxxx        xx                "  # 22
     "       xx                           "  # 23
     )
-ACTIONS_REACTION = Udchars("<-  ", 9, 24,
+ACTIONS_123 = Udchars("  */**/***", 9, 24,
+    #0         0         0         0         0         0         0         0         0        9
+    "                                                                                          "  #  0
+    "                                                                                          "  #  1
+    "                                                                                          "  #  2
+    "                                                                                          "  #  3
+    "                                                                                          "  #  4
+    "                                                                                          "  #  5
+    "                                                                                          "  #  6
+    "                                                                                          "  #  7
+    "       xx                   xx                             xx                             "  #  8
+    "      xxxx                 xxxx        xx                 xxxx        xx                  "  #  9
+    "     xxxxxx               xxxxxx      xxxx               xxxxxx      xxxx        xx       "  # 10
+    "    xxxxxxxx             xxxxxxxx    xxxxxx             xxxxxxxx    xxxxxx      xxxx      "  # 11
+    "   xxxxxxxxxx           xxxxxxxxxx  xxxxxxxx           xxxxxxxxxx  xxxxxxxx    xxxxxx     "  # 12
+    "    xxxxxxxxxx           xxxxxxxxxx  xxxxxxxx           xxxxxxxxxx  xxxxxxxx  xxxxxxxx    "  # 13
+    " xx  xxxxxxxxxx       xx  xxxxxxxxxx  xxxxxxxx       xx  xxxxxxxxxx  xxxxxxxx  xxxxxxxx   "  # 14
+    "xxxx  xxxxxxxxxx     xxxx  xxxxxxxxxx  xxxxxxxx     xxxx  xxxxxxxxxx  xxxxxxxx  xxxxxxxx  "  # 15
+    "xxxx  xxxxxxxxxx     xxxx  xxxxxxxxxx  xxxxxxxx     xxxx  xxxxxxxxxx  xxxxxxxx  xxxxxxxx  "  # 16
+    " xx  xxxxxxxxxx       xx  xxxxxxxxxx  xxxxxxxx       xx  xxxxxxxxxx  xxxxxxxx  xxxxxxxx   "  # 17
+    "    xxxxxxxxxx           xxxxxxxxxx  xxxxxxxx           xxxxxxxxxx  xxxxxxxx  xxxxxxxx    "  # 18
+    "   xxxxxxxxxx           xxxxxxxxxx  xxxxxxxx           xxxxxxxxxx  xxxxxxxx    xxxxxx     "  # 19
+    "    xxxxxxxx             xxxxxxxx    xxxxxx             xxxxxxxx    xxxxxx      xxxx      "  # 20
+    "     xxxxxx               xxxxxx      xxxx               xxxxxx      xxxx        xx       "  # 21
+    "      xxxx                 xxxx        xx                 xxxx        xx                  "  # 22
+    "       xx                   xx                             xx                             "  # 23
+    )
+ACTIONS_REACTION = Udchars("  <-", 9, 24,
     #0         0         0         0    5
     "         xxxxxxxxxxx                "  #  0
     "      xxxxxxxxxxxxxxxxx             "  #  1

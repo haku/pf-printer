@@ -1,5 +1,6 @@
 from contextlib import AbstractContextManager
 from types import TracebackType
+from typing import List
 import io
 
 from escpos import printer
@@ -24,6 +25,7 @@ import rich.box
 import stransi
 
 from args import ARGS
+from udchar import Udchars
 
 ARGS.add_argument("--width", dest='text_width', type=int)
 ARGS.add_argument("--details", dest='show_details', action="store_true")
@@ -81,9 +83,7 @@ class Printer(AbstractContextManager):
 
     self.renderables = []
 
-    file = io.StringIO()
     self.console = Console(
-        file=file,
         force_terminal=True,
         width=self.width,
         highlight=False,
@@ -96,20 +96,7 @@ class Printer(AbstractContextManager):
 
   def __exit__(self, exc_type: type[BaseException] | None, exc_value:
                BaseException | None, traceback: TracebackType | None) -> None:
-    for r in self.renderables:
-      self.console.print(r)
-    captured = self.console.file.getvalue()
-
-    if ARGS.print_preview:
-      p = printer.Dummy(profile=ARGS.print_profile)
-      self.ansi_to_escpos(captured, p)
-      print(p.output)
-    elif ARGS.print_addr:
-      p = printer.Network(ARGS.print_addr, profile=ARGS.print_profile)
-      self.ansi_to_escpos(captured, p)
-      p.cut()
-    else:
-      print(captured)
+    self.render()
 
   @staticmethod
   def html_to_md(html):
@@ -132,12 +119,12 @@ class Printer(AbstractContextManager):
     else:
       raise Exception(f"can not print type {type(text)}: {text}")
 
-  def print_title(self, text):
-    title = Text(text, style=Style(bold=True))
-    width = self.title_width if self.format_to_print else self.width
-    title.align("center", width)
+  def print_title(self, text: str | List[str | Udchars]):
+    page_width = self.title_width if self.format_to_print else self.width
+    text_width = self.count_chars(text)
+    pad_width = int((page_width - text_width) / 2)
 
-    segs = [title]
+    segs = [Segment(' ' * pad_width)] + self.segment_wrap(text) + [Segment.line()]
     if self.format_to_print:
       segs.insert(0, Segment(TITLE_MARKER))
       segs.append(Segment(NORMAL_MARKER, style=Style(bold=True)))
@@ -158,22 +145,23 @@ class Printer(AbstractContextManager):
     # ─ should get converted to cp437/0xc4
     self.renderables.append(Rule(characters='─'))
 
-  def print_item(self, marker, text):
+  def print_item(self, marker: str | List[str | Udchars], text):
     if not text:
       return
-    self.print(self.render_item(f"{marker} ", text))
+    self.print(self.render_item(marker, text))
 
-  def render_item(self, marker, text):
-    opts = self.console.options.update_width(self.width - len(marker))
+  def render_item(self, marker: str | List[str | Udchars], text):
+    marker_width = self.count_chars(marker)
+    opts = self.console.options.update_width(self.width - marker_width)
     lines = self.console.render_lines(text, options=opts, pad=False)
     ret = []
 
-    ret.append(Segment(marker))
+    ret.extend(self.segment_wrap(marker))
     ret.extend(lines.pop(0))
     ret.append(NewLine())
 
     for l in lines:
-      ret.append(Segment(' ' * len(marker)))
+      ret.append(Segment(' ' * marker_width))
       ret.extend(l)
       ret.append(NewLine())
 
@@ -188,11 +176,67 @@ class Printer(AbstractContextManager):
       self.print(heading)
       self.print_markdown(md)
 
-  @staticmethod
-  def ansi_to_escpos(ansi, printer):
+  def count_chars(self, thing: str | List[str | Udchars]):
+    if isinstance(thing, list):
+      return sum([len(a) for a in thing])
+    return len(thing)
+
+  def segment_wrap(self, things: str | List[str | Udchars]):
+    if isinstance(things, list):
+      return[Segment(a) if isinstance(a, str) else a for a in things]
+    return [Segment(things) if isinstance(things, str) else things]
+
+  def render(self):
+    p = None
+    if ARGS.print_preview:
+      p = printer.Dummy(profile=ARGS.print_profile)
+    elif ARGS.print_addr:
+      p = printer.Network(ARGS.print_addr, profile=ARGS.print_profile)
+
+    if p:
+      p.set_with_default(font=ARGS.print_font)
+
+    self.render_renderables(self.renderables, p)
+
+    if ARGS.print_preview:
+      print(p.output, end="")
+    elif ARGS.print_addr:
+      p.cut()
+
+  def render_renderables(self, renderables, printer):
+    for r in renderables:
+      if isinstance(r, Segments):
+        self.render_segments(r.segments, printer)
+      else:
+        self.render_rich([r], printer)
+
+  def render_segments(self, segments: List[Segments], printer):
+    for s in segments:
+      if isinstance(s, Udchars):
+        self.render_udchars(s, printer)
+      elif isinstance(s, Segment):
+        self.render_rich([Segments([s])], printer)
+      else:
+        self.render_rich([s], printer)
+
+  def render_udchars(self, udchars: Udchars, printer):
+    if printer:
+      udchars.print_to_printer(printer, "b")
+    else:
+      print(udchars.placeholder, end="")
+
+  def render_rich(self, renderables: List, printer):
+    with self.console.capture() as cap:
+      for r in renderables:
+        self.console.print(r)
+
+    if printer:
+      self.ansi_to_escpos(cap.get(), printer)
+    else:
+      print(cap.get(), end="")
+
+  def ansi_to_escpos(self, ansi, printer):
     decoded = stransi.Ansi(ansi)
-    # https://python-escpos.readthedocs.io/en/latest/api/escpos.html#escpos.escpos.Escpos.set_with_default
-    printer.set_with_default(font=ARGS.print_font)
     for i in decoded.instructions():
       if isinstance(i, str):
         if i.startswith(TITLE_MARKER):
