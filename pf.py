@@ -19,6 +19,8 @@ def actions(system) -> str | Udchars:
 def parse_actions(t) -> str | Udchars:
   if t == 'reaction':
     return pf_icons.ACTIONS_REACTION
+  elif t == 'free':
+    return pf_icons.ACTIONS_FREE
   elif t == 'passive':
     return '-'
   elif t == 1 or t == "1":
