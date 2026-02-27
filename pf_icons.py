@@ -137,6 +137,33 @@ ACTIONS_123 = Udchars("  */**/***", 9, 24,
     )
 ACTIONS_REACTION = Udchars("  <-", 9, 24,
     #0         0         0         0    5
+    "                                    "  #  0
+    "                                    "  #  1
+    "                                    "  #  2
+    "                                    "  #  3
+    "                                    "  #  4
+    "                                    "  #  5
+    "                                    "  #  6
+    "         xxxxxxxxxx                 "  #  7
+    "      xxxxxxxxxxxxxxxx              "  #  8
+    "    xxxxxx    xxxxxxxxxx            "  #  9
+    "   xxxx          xxxxxxxx           "  # 10
+    "  xxx              xxxxxxx          "  # 11
+    " xx                 xxxxxx          "  # 12
+    "x                    xxxxxx         "  # 13
+    "                      xxxxx         "  # 14
+    "                      xxxxx         "  # 15
+    "                      xxxxx         "  # 16
+    "          xxxxx      xxxxx          "  # 17
+    "        xxxxxx     xxxxxxx          "  # 18
+    "      xxxxxxxxxxxxxxxxxx            "  # 19
+    "     xxxxxxxxxxxxxxxxx              "  # 20
+    "      xxxxxxxxxxxxx                 "  # 21
+    "        xxxxxx                      "  # 22
+    "          xxxxx                     "  # 23
+    )
+ACTIONS_REACTION_BIG = Udchars("  <-", 9, 24,
+    #0         0         0         0    5
     "         xxxxxxxxxxx                "  #  0
     "      xxxxxxxxxxxxxxxxx             "  #  1
     "    xxxxxxxxxxxxxxxxxxxxx           "  #  2
