@@ -65,10 +65,12 @@ class MyTableElement(TableElement):
 
 class Printer(AbstractContextManager):
 
-  def __init__(self):
+  def __init__(self, print_addr=None):
     Paragraph.new_line = False
     ListElement.new_line = False
     ListItem.new_line = False
+
+    self.print_addr = print_addr or ARGS.print_addr
 
     if ARGS.text_width:
       self.width = ARGS.text_width
@@ -79,7 +81,7 @@ class Printer(AbstractContextManager):
       raise Exception(f"invalid width: {self.width}")
 
     self.title_width = min(self.width, p.profile.get_columns(TITLE_FONT))
-    self.format_to_print = ARGS.print_preview or ARGS.print_addr
+    self.format_to_print = ARGS.print_preview or self.print_addr
 
     self.renderables = []
 
@@ -91,12 +93,15 @@ class Printer(AbstractContextManager):
         no_color=True,
         )
 
+    self.render_called = False
+
   def __enter__(self):
     return self
 
   def __exit__(self, exc_type: type[BaseException] | None, exc_value:
                BaseException | None, traceback: TracebackType | None) -> None:
-    self.render()
+    if not self.render_called:
+      print(self.render(), end="")
 
   @staticmethod
   def html_to_md(html):
@@ -187,45 +192,50 @@ class Printer(AbstractContextManager):
     return [Segment(things) if isinstance(things, str) else things]
 
   def render(self):
+    self.render_called = True
+    preview = []
+
     p = None
     if ARGS.print_preview:
       p = printer.Dummy(profile=ARGS.print_profile)
-    elif ARGS.print_addr:
-      p = printer.Network(ARGS.print_addr, profile=ARGS.print_profile)
+    elif self.print_addr:
+      p = printer.Network(self.print_addr, profile=ARGS.print_profile)
 
     if p:
       p.set_with_default(font=ARGS.print_font)
 
-    self.render_renderables(self.renderables, p)
+    self.render_renderables(self.renderables, p, preview)
 
     if ARGS.print_preview:
-      print(p.output, end="")
-    elif ARGS.print_addr:
+      preview.append(p.output)
+    elif self.print_addr:
       p.cut()
 
-  def render_renderables(self, renderables, printer):
+    return "".join(preview)
+
+  def render_renderables(self, renderables, printer, preview):
     for r in renderables:
       if isinstance(r, Segments):
-        self.render_segments(r.segments, printer)
+        self.render_segments(r.segments, printer, preview)
       else:
-        self.render_rich([r], printer)
+        self.render_rich([r], printer, preview)
 
-  def render_segments(self, segments: List[Segments], printer):
+  def render_segments(self, segments: List[Segments], printer, preview):
     for s in segments:
       if isinstance(s, Udchars):
-        self.render_udchars(s, printer)
+        self.render_udchars(s, printer, preview)
       elif isinstance(s, Segment):
-        self.render_rich([Segments([s])], printer)
+        self.render_rich([Segments([s])], printer, preview)
       else:
-        self.render_rich([s], printer)
+        self.render_rich([s], printer, preview)
 
-  def render_udchars(self, udchars: Udchars, printer):
+  def render_udchars(self, udchars: Udchars, printer, preview):
     if printer:
       udchars.print_to_printer(printer, "b")
     else:
-      print(udchars.placeholder, end="")
+      preview.append(udchars.placeholder)
 
-  def render_rich(self, renderables: List, printer):
+  def render_rich(self, renderables: List, printer, preview):
     with self.console.capture() as cap:
       for r in renderables:
         self.console.print(r)
@@ -233,7 +243,7 @@ class Printer(AbstractContextManager):
     if printer:
       self.ansi_to_escpos(cap.get(), printer)
     else:
-      print(cap.get(), end="")
+      preview.append(cap.get())
 
   def ansi_to_escpos(self, ansi, printer):
     decoded = stransi.Ansi(ansi)
