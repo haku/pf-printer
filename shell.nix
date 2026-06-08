@@ -2,6 +2,8 @@
 pkgs.mkShell {
   packages = with pkgs; [
     (pkgs.python3.withPackages (python-pkgs: with python-pkgs; [
+      flask
+      gunicorn
       markdownify
       python-escpos
       requests
