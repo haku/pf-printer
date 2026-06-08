@@ -17,14 +17,14 @@ Usage
 Example usage:
 ```shell
 # preview in console
-./print-item     --json ~/3src/pf2e/packs/pf2e/equipment/healing-potion-lesser.json
-./print-creature --json ~/3src/pf2e/packs/pf2e/pathfinder-monster-core/mitflit.json --details
+./print_item.py     --json ~/3src/pf2e/packs/pf2e/equipment/healing-potion-lesser.json
+./print_creature.py --json ~/3src/pf2e/packs/pf2e/pathfinder-monster-core/mitflit.json --details
 
 # preview what will be sent to printer
-./print-creature --json .../thing.json --details --preview
+./print_creature.py --json .../thing.json --details --preview
 
 # actually send to printer
-./print-creature --json .../thing.json --details --printer 192.168.1.123
+./print_creature.py --json .../thing.json --details --printer 192.168.1.123
 ```
 
 Written hastily and experimental.  Please don't judge code quality.

@@ -15,7 +15,9 @@ from formatting import space
 def ac(ac):
   return space(f"AC {ac['value']}", ac['details'])
 
-def print_creature(data, printer):
+def print_creature(data, opts, printer):
+  data = rdata.ensure(data)
+
   printer.print_title(data['name']);
   stm = data['system']
 
@@ -99,6 +101,7 @@ def print_creature(data, printer):
     for i in items])
 
 
-data = rdata.read_json()
-with printer.Printer() as p:
-  print_creature(data, p)
+if __name__ == "__main__":
+  data = rdata.read_json()
+  with printer.Printer() as p:
+    print_creature(data, None, p)

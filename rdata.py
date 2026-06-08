@@ -31,3 +31,14 @@ def read_json():
   with open(ARGS.get_required('json_path'), 'r') as f:
     data = json.load(f)
   return to_rdict(data)
+
+def ensure(thing):
+  if isinstance(thing, RDict):
+    return thing
+  elif isinstance(thing, str):
+    j = json.loads(thing)
+    return to_rdict(j)
+  elif isinstance(thing, dict):
+    return to_rdict(thing)
+  else:
+    raise ValueError(f"Can not convert: {type(thing)}")

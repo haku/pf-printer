@@ -7,7 +7,9 @@ import rdata
 from args import ARGS
 from formatting import space
 
-def print_recipe(data, printer):
+def print_recipe(data, opts, printer):
+  data = rdata.ensure(data)
+
   printer.print_title(f"{data['id']}: {data['name']}");
 
   for num, step in enumerate(data['steps']):
@@ -33,11 +35,12 @@ def print_recipe(data, printer):
     #printer.print(step['instruction'])
     printer.print_html(step['instructions_markdown'])
 
-ARGS.add_argument("--url", required=True)
-ARGS.add_argument("--token", required=True)
+if __name__ == "__main__":
+  ARGS.add_argument("--url", required=True)
+  ARGS.add_argument("--token", required=True)
 
-req = requests.get(ARGS.url, headers={"Authorization": f"Bearer {ARGS.token}"})
-data = req.json()
-data = rdata.to_rdict(data)
-with printer.Printer() as p:
-  print_recipe(data, p)
+  req = requests.get(ARGS.url, headers={"Authorization": f"Bearer {ARGS.token}"})
+  data = req.json()
+  data = rdata.to_rdict(data)
+  with printer.Printer() as p:
+    print_recipe(data, None, p)

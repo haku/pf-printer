@@ -27,7 +27,9 @@ def hp(h):
     return f"{m} hp"
   return None
 
-def print_item(data, printer):
+def print_item(data, opts, printer):
+  data = rdata.ensure(data)
+
   stm = data['system']
 
   printer.print_title(data['name'])
@@ -59,6 +61,7 @@ def print_item(data, printer):
   printer.print_html(pf.remove_macros_html(stm['description']['value']))
 
 
-data = rdata.read_json()
-with printer.Printer() as p:
-  print_item(data, p)
+if __name__ == "__main__":
+  data = rdata.read_json()
+  with printer.Printer() as p:
+    print_item(data, None, p)

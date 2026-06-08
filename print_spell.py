@@ -11,8 +11,6 @@ from formatting import com
 from formatting import space
 from formatting import suffix
 
-ARGS.add_argument("--rank", type=int)
-
 
 def duration(d):
   if not d['sustained']:
@@ -77,7 +75,9 @@ def heighten_area(stm):
 
   return space(val, typ)
 
-def print_spell(data, printer):
+def print_spell(data, opts, printer):
+  data = rdata.ensure(data)
+
   stm = data['system']
 
   actions = pf.actions(stm)
@@ -106,6 +106,9 @@ def print_spell(data, printer):
   printer.print_html(pf.remove_macros_html(stm['description']['value']))
 
 
-data = rdata.read_json()
-with printer.Printer() as p:
-  print_spell(data, p)
+if __name__ == "__main__":
+  ARGS.add_argument("--rank", type=int)
+
+  data = rdata.read_json()
+  with printer.Printer() as p:
+    print_spell(data, None, p)
