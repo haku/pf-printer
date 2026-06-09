@@ -111,7 +111,7 @@ class Printer(AbstractContextManager):
     return markdownify(html, strip=['hr'])
 
   def println(self):
-    self.print("")
+    self.print(" ")  # empty string is falsey and gets ignored.
 
   def print(self, text):
     if not text:
