@@ -14,9 +14,17 @@ def print_recipe(data, opts, printer):
 
   for num, step in enumerate(data['steps']):
     printer.println()
-    printer.print(f"Step {num}")
+
+    heading = [i['note'] for i in step['ingredients'] if i['is_header']]
+    if heading:
+      heading = f": {space(*heading)}"
+
+    printer.print(space(f"Step {num}", heading))
 
     for ing in step['ingredients']:
+      if ing['is_header']:
+        continue
+
       amt = space(
           f"{ing['amount']:g}" if ing['amount'] else None,
           ing['unit']['name'])
