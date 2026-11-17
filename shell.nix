@@ -5,6 +5,7 @@ pkgs.mkShell {
       flask
       gunicorn
       markdownify
+      pillow
       python-escpos
       requests
       rich

@@ -3,6 +3,7 @@ from types import TracebackType
 from typing import List
 import io
 
+from PIL import Image
 from escpos import printer
 from markdownify import markdownify
 from rich.align import Align
@@ -25,6 +26,7 @@ import rich.box
 import stransi
 
 from args import ARGS
+from images import ImageWrapper
 from udchar import Udchars
 
 ARGS.add_argument("--width", dest='text_width', type=int)
@@ -181,6 +183,9 @@ class Printer(AbstractContextManager):
       self.print(heading)
       self.print_markdown(md)
 
+  def print_image(self, img: Image.Image):
+    self.print(Segments([ImageWrapper(img)]))
+
   def count_chars(self, thing: str | List[str | Udchars]):
     if isinstance(thing, list):
       return sum([len(a) for a in thing])
@@ -211,7 +216,7 @@ class Printer(AbstractContextManager):
     elif self.print_addr:
       p.cut()
 
-    return "".join(preview)
+    return "".join([x.decode('utf-8', errors='replace') if not isinstance(x, str) else x for x in preview])
 
   def render_renderables(self, renderables, printer, preview):
     for r in renderables:
@@ -226,6 +231,8 @@ class Printer(AbstractContextManager):
         self.render_udchars(s, printer, preview)
       elif isinstance(s, Segment):
         self.render_rich([Segments([s])], printer, preview)
+      elif isinstance(s, ImageWrapper):
+        self.render_image(s, printer, preview)
       else:
         self.render_rich([s], printer, preview)
 
@@ -234,6 +241,12 @@ class Printer(AbstractContextManager):
       udchars.print_to_printer(printer, "b")
     else:
       preview.append(udchars.placeholder)
+
+  def render_image(self, img: ImageWrapper, printer, preview):
+    if printer:
+      img.print_to_printer(printer)
+    else:
+      preview.append(img.placeholder)
 
   def render_rich(self, renderables: List, printer, preview):
     with self.console.capture() as cap:

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from PIL import Image
+from io import BytesIO
 import requests
 
 import printer
@@ -47,8 +49,17 @@ if __name__ == "__main__":
   ARGS.add_argument("--url", required=True)
   ARGS.add_argument("--token", required=True)
 
-  req = requests.get(ARGS.url, headers={"Authorization": f"Bearer {ARGS.token}"})
-  data = req.json()
+  auth_headers = {"Authorization": f"Bearer {ARGS.token}"}
+  jresp = requests.get(ARGS.url, headers=auth_headers)
+  data = jresp.json()
   data = rdata.to_rdict(data)
+
+  image_url = data['image']
+  presp = requests.get(image_url, headers=auth_headers)
+  img = Image.open(BytesIO(presp.content))
+
   with printer.Printer() as p:
+    p.print_image(img)
+    p.println()
+
     print_recipe(data, None, p)
